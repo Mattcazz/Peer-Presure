@@ -1,109 +1,80 @@
 package user
 
 import (
+	"database/sql"
 	"fmt"
-	"net/http"
-	"os"
-	"time"
 
-	"github.com/Mattcazz/Peer-Presure.git/service/auth"
 	"github.com/Mattcazz/Peer-Presure.git/types"
-	"github.com/Mattcazz/Peer-Presure.git/utils"
-	"github.com/go-playground/validator/v10"
-	"github.com/gorilla/mux"
 )
 
-type Handler struct {
-	store types.UserStore
+type Store struct {
+	db *sql.DB
 }
 
-func NewUserHandler(s types.UserStore) *Handler {
-	return &Handler{store: s}
+func NewStore(db *sql.DB) *Store {
+	return &Store{db: db}
 }
 
-func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/login", h.handleLogin).Methods("Post")
-	router.HandleFunc("/register", h.handleRegister).Methods("Post")
+func (s *Store) GetUserByEmail(email string) (*types.User, error) {
+
+	query := `SELECT * FROM users WHERE "email" = $1`
+
+	row, err := s.db.Query(query, email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for row.Next() {
+		return scanUserRow(row)
+	}
+
+	return nil, fmt.Errorf("the search came up with no results")
 }
 
-func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
+func (s *Store) CreateUser(user types.User) error {
 
-	var payload types.LoginUserPayload
-	err := utils.ParseJSON(r, &payload)
+	query := `INSERT INTO users 
+			(user_name, email, password, created_at)
+			VALUES ($1, $2, $3, $4)`
 
-	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
-	}
+	_, err := s.db.Query(query,
+		user.UserName,
+		user.Email,
+		user.Password,
+		user.CreatedAt)
 
-	if err := utils.Validate.Struct(payload); err != nil {
-		errors := err.(validator.ValidationErrors)
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload %s", errors))
-	}
-
-	u, err := h.store.GetUserByEmail(payload.Email)
-
-	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found, invalid email or password"))
-		return
-	}
-
-	if !auth.ValidatePassword(u.Password, []byte(payload.Password)) {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found, invalid email or password"))
-		return
-	}
-
-	secret := os.Getenv("JWT_SECRET")
-
-	token, err := auth.CreateJWT([]byte(secret), u.ID)
-
-	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
-		return
-	}
-
-	utils.WriteJSON(w, http.StatusOK, map[string]string{"token": token})
+	return err
 }
 
-func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
+func (s *Store) GetUserById(id int) (*types.User, error) {
 
-	var payload types.RegisterUserPayload
-	err := utils.ParseJSON(r, &payload)
+	query := `SELECT * FROM users WHERE id = $1`
 
-	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
-	}
-
-	if err := utils.Validate.Struct(payload); err != nil {
-		errors := err.(validator.ValidationErrors)
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload %s", errors))
-		return
-	}
-
-	_, err = h.store.GetUserByEmail(payload.Email)
-
-	if err == nil { // err == nil that means that it found a user with the given email
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user with email %s already exists", payload.Email))
-		return
-	}
-
-	hashedPassword, err := auth.HashPassword(payload.Password)
+	row, err := s.db.Query(query, id)
 
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
-		return
+		return nil, err
 	}
 
-	err = h.store.CreateUser(types.User{
-		UserName:  payload.UserName,
-		Email:     payload.Email,
-		Password:  hashedPassword,
-		CreatedAt: time.Now(),
-	})
-
-	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
-		return
+	for row.Next() {
+		return scanUserRow(row)
 	}
 
-	utils.WriteJSON(w, http.StatusCreated, nil)
+	return nil, fmt.Errorf("the search came up with no results")
+
+}
+
+// Private function that returns a user given a row to scan
+func scanUserRow(row *sql.Rows) (*types.User, error) {
+	user := new(types.User)
+
+	err := row.Scan(
+		&user.ID,
+		&user.UserName,
+		&user.Email,
+		&user.Password,
+		&user.CreatedAt)
+
+	return user, err
 }
