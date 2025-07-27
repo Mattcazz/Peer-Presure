@@ -29,3 +29,37 @@ type User struct {
 
 	CreatedAt time.Time `json:"created_at"`
 }
+
+type PostStore interface {
+	GetPostById(int) (*Post, error)
+	GetPostsFromUser(int) ([]*Post, error)
+	CreatePost(Post) error
+	DeletePost(int) error
+}
+
+type Post struct {
+	ID     int    `json:"id"`
+	UserId int    `json:"user_id"`
+	Title  string `json:"title"`
+	Text   string `json:"text"`
+	ImgURL string `json:"img_url"`
+	Public bool   `json:"public"`
+
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type CommentStore interface {
+	GetCommentsFromUser(int) ([]*Comment, error)
+	GetCommentsFromPost(int) ([]*Comment, error)
+	CreateComment(*Comment) error
+	DeleteComment(int) error
+}
+
+type Comment struct {
+	ID     int
+	UserID int
+	PostID int
+	Text   string
+
+	CreatedAt time.Time `json:"created_at"`
+}

@@ -10,6 +10,7 @@ import (
 	"github.com/Mattcazz/Peer-Presure.git/service/auth"
 	"github.com/Mattcazz/Peer-Presure.git/types"
 	"github.com/Mattcazz/Peer-Presure.git/utils"
+	"github.com/Mattcazz/Peer-Presure.git/web"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 )
@@ -19,15 +20,19 @@ type Handler struct {
 }
 
 func NewHandler(s types.UserStore) *Handler {
+
 	return &Handler{store: s}
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/login", h.handleLogin).Methods("POST")
-	router.HandleFunc("/register", h.handleRegister).Methods("POST")
+	router.HandleFunc("/login", h.handleLoginPost).Methods(http.MethodPost)
+	router.HandleFunc("/login", h.handleLoginGet).Methods(http.MethodGet)
+	router.HandleFunc("/register", h.handleRegisterPost).Methods(http.MethodPost)
+	router.HandleFunc("/register", h.handleRegisterGet).Methods(http.MethodGet)
 }
 
-func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
+
 	log.Printf("handleLogin called")
 	var payload types.LoginUserPayload
 	err := r.ParseForm()
@@ -71,7 +76,11 @@ func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, map[string]string{"token": token})
 }
 
-func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleLoginGet(w http.ResponseWriter, r *http.Request) {
+	web.RenderTemplate(w, "login", "Login", map[string]any{})
+}
+
+func (h *Handler) handleRegisterPost(w http.ResponseWriter, r *http.Request) {
 
 	var payload types.RegisterUserPayload
 	err := r.ParseForm()
@@ -84,6 +93,8 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	payload.Email = r.FormValue("email")
 	payload.UserName = r.FormValue("username")
 	payload.Password = r.FormValue("password")
+
+	log.Println(payload)
 
 	if err := utils.Validate.Struct(payload); err != nil {
 		errors := err.(validator.ValidationErrors)
@@ -118,4 +129,9 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusCreated, nil)
+}
+
+func (h *Handler) handleRegisterGet(w http.ResponseWriter, r *http.Request) {
+
+	web.RenderTemplate(w, "register", "Register", map[string]any{})
 }
