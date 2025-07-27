@@ -12,18 +12,21 @@ type Handler struct {
 }
 
 func NewHandler() *Handler {
-	loadTemplates("web/templates/*.html")
+	loadTemplates()
 	return &Handler{}
 }
 
 func (h *Handler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/login", h.handleLoginPage).Methods("GET")
+	r.HandleFunc("/register", h.handleRegisterPage).Methods("GET")
 }
 
 func (h *Handler) handleLoginPage(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "login.html", map[string]any {
-		"title": "Login Page",
-	})
+	renderTemplate(w, "login", "Login", map[string]any{})
+}
+
+func (h *Handler) handleRegisterPage(w http.ResponseWriter, r *http.Request) {
+	renderTemplate(w, "register", "Register", map[string]any{})
 }
 
 /*

@@ -2,6 +2,7 @@ package user
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -22,17 +23,24 @@ func NewHandler(s types.UserStore) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/login", h.handleLogin).Methods("Post")
-	router.HandleFunc("/register", h.handleRegister).Methods("Post")
+	router.HandleFunc("/login", h.handleLogin).Methods("POST")
+	router.HandleFunc("/register", h.handleRegister).Methods("POST")
 }
 
 func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
+	log.Printf("handleLogin called")
 	var payload types.LoginUserPayload
-	err := utils.ParseJSON(r, &payload)
+	err := r.ParseForm()
+	// err := utils.ParseJSON(r, &payload)
 
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 	}
+
+	payload.Email = r.FormValue("email")
+	payload.Password = r.FormValue("password")
+
+	log.Printf("Got POST request with email '%v' and password '%v'\n", payload.Email, payload.Password)
 
 	if err := utils.Validate.Struct(payload); err != nil {
 		errors := err.(validator.ValidationErrors)
@@ -66,11 +74,16 @@ func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 
 	var payload types.RegisterUserPayload
-	err := utils.ParseJSON(r, &payload)
+	err := r.ParseForm()
+	// err := utils.ParseJSON(r, &payload)
 
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 	}
+
+	payload.Email = r.FormValue("email")
+	payload.UserName = r.FormValue("username")
+	payload.Password = r.FormValue("password")
 
 	if err := utils.Validate.Struct(payload); err != nil {
 		errors := err.(validator.ValidationErrors)

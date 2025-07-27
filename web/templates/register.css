@@ -1,0 +1,46 @@
+body, html {
+	background-color: #f9f9f9;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#register-container {
+	background-color: #f0f0f0;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: stretch;
+	width: 33%;
+	margin: auto;
+	padding: 20px;
+	box-sizing: border-box;
+	border-radius: 8px;
+}
+
+form {
+	width: 100%;
+}
+
+input, button {
+	width: 100%;
+	padding: 12px 20px;
+	margin: 8px 0;
+
+	box-sizing: border-box;
+
+	border: 2px solid #dcdcdc;
+	border-radius: 4px;
+}
+
+button {
+	background-color: blue;
+	color: white;
+	font-weight: bold;
+	cursor: pointer;
+}
