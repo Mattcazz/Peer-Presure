@@ -29,6 +29,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/login", h.handleLoginGet).Methods(http.MethodGet)
 	router.HandleFunc("/register", h.handleRegisterPost).Methods(http.MethodPost)
 	router.HandleFunc("/register", h.handleRegisterGet).Methods(http.MethodGet)
+	router.HandleFunc("/logout", h.handleLogout).Methods(http.MethodPost)
 }
 
 func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
@@ -40,6 +41,7 @@ func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
+		return
 	}
 
 	payload.Email = r.FormValue("email")
@@ -72,6 +74,14 @@ func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    token,
+		Expires:  time.Now().Add(24 * time.Hour),
+		HttpOnly: true,
+		Secure:   false,
+	})
 
 	utils.WriteJSON(w, http.StatusOK, map[string]string{"token": token})
 }
@@ -134,4 +144,19 @@ func (h *Handler) handleRegisterPost(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleRegisterGet(w http.ResponseWriter, r *http.Request) {
 
 	web.RenderTemplate(w, "register", "Register", map[string]any{})
+}
+
+func (h *Handler) handleLogout(w http.ResponseWriter, r *http.Request) {
+
+	// we override the cookie with an expiring one so that it is no longer working
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    "",
+		Expires:  time.Now().Add(-1 * time.Hour), // Expire immediately
+		HttpOnly: true,
+		Secure:   false,
+	})
+
+	utils.WriteJSON(w, http.StatusOK, nil)
 }
