@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/Mattcazz/Peer-Presure.git/service/user"
+	"github.com/Mattcazz/Peer-Presure.git/service/web"
 
 	"github.com/gorilla/mux"
 )
@@ -23,7 +24,6 @@ func NewApiServer(addr string, db *sql.DB) *APIServer {
 }
 
 func (s *APIServer) Run() error {
-
 	router := mux.NewRouter()
 
 	subRouter := router.PathPrefix("/api/v1").Subrouter()
@@ -31,6 +31,11 @@ func (s *APIServer) Run() error {
 	userStore := user.NewStore(s.db)
 	userHandler := user.NewHandler(userStore)
 	userHandler.RegisterRoutes(subRouter)
+
+	webSubRouter := router.PathPrefix("/").Subrouter()
+	webHandler := web.NewHandler()
+	webHandler.RegisterRoutes(webSubRouter)
+	
 
 	log.Println("Listening on ", s.addr)
 
