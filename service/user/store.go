@@ -65,6 +65,20 @@ func (s *Store) GetUserById(id int) (*types.User, error) {
 
 }
 
+func (s *Store) GetUsernameById(id int) (string, error) {
+
+	var username string
+
+	err := s.db.QueryRow("SELECT username FROM users WHERE id = $1", id).Scan(&username)
+
+	if err != nil {
+		return "", err
+	}
+
+	return username, nil
+
+}
+
 // Private function that returns a user given a row to scan
 func scanUserRow(row *sql.Rows) (*types.User, error) {
 	user := new(types.User)

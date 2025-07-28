@@ -35,7 +35,7 @@ func (s *APIServer) Run() error {
 
 	postStore := post.NewStore(s.db)
 	commentStore := comment.NewStore(s.db)
-	postHandler := post.NewHandler(postStore, commentStore)
+	postHandler := post.NewHandler(postStore, commentStore, userStore)
 	postHandler.RegisterRoutes(webSubRouter)
 
 	web.LoadTemplates()

@@ -15,12 +15,14 @@ import (
 type Handler struct {
 	postStore    types.PostStore
 	commentStore types.CommentStore
+	UserStore    types.UserStore
 }
 
-func NewHandler(ps types.PostStore, cs types.CommentStore) *Handler {
+func NewHandler(ps types.PostStore, cs types.CommentStore, us types.UserStore) *Handler {
 	return &Handler{
 		postStore:    ps,
 		commentStore: cs,
+		UserStore:    us,
 	}
 }
 
@@ -129,14 +131,21 @@ func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username := post.UserId
+
+	username, err := h.UserStore.GetUsernameById(post.UserId)
+
+
+	if err != nil {
+		http.Error(w, "user does not exists (check userID)", http.StatusBadRequest)
+		return
+	}
 
 	data := map[string]any{
-		"title": post.Title,
-		"body": post.Text,
+		"title":    post.Title,
+		"body":     post.Text,
 		"username": username,
-		"img_url": post.ImgURL,
-		"postID": post.ID,
+		"img_url":  post.ImgURL,
+		"postID":   post.ID,
 	}
 	web.RenderTemplate(w, "post-page", data)
 }
