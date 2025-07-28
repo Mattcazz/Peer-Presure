@@ -95,7 +95,7 @@ func scanPostRow(r *sql.Rows) (*types.Post, error) {
 		&post.Title,
 		&post.Text,
 		&post.ImgURL,
-		&post.Text,
+		&post.Public,
 		&post.CreatedAt,
 	)
 

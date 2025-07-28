@@ -1,0 +1,13 @@
+{{ define "post" }}
+<div class="card mb-3" hx-target="this" hx-swap="outerHTML">
+	<div class="card-body">
+		<h5 class="card-title">{{ .title }}</h5>
+		<h6 class="card-subtitle mb-2 text-muted">@{{ .username }}</h6>
+		<p class="card-text">{{ .body }}</p>
+
+		{{ if .img_url }}
+		<img src="{{ .img_url }}" class="img-fluid rounded mt-3" alt="Post image">
+		{{ end }}
+	</div>
+</div>
+{{ end }}

@@ -54,11 +54,11 @@ func (h *Handler) handleHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleHomeGuest(w http.ResponseWriter, r *http.Request) {
-	web.RenderTemplate(w, "home", "PeerPressure", map[string]any{})
+	web.RenderTemplate(w, "home", map[string]any{})
 }
 
 func (h *Handler) handleHomeUser(w http.ResponseWriter, r *http.Request) {
-	web.RenderTemplate(w, "feed", "PeerPressure", map[string]any{})
+	web.RenderTemplate(w, "feed", map[string]any{})
 }
 
 func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
@@ -116,7 +116,7 @@ func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleLoginGet(w http.ResponseWriter, r *http.Request) {
-	web.RenderTemplate(w, "login", "Login", map[string]any{})
+	web.RenderTemplate(w, "login", map[string]any{})
 }
 
 func (h *Handler) handleRegisterPost(w http.ResponseWriter, r *http.Request) {
@@ -172,7 +172,7 @@ func (h *Handler) handleRegisterPost(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) handleRegisterGet(w http.ResponseWriter, r *http.Request) {
 
-	web.RenderTemplate(w, "register", "Register", map[string]any{})
+	web.RenderTemplate(w, "register", map[string]any{})
 }
 
 func (h *Handler) handleLogout(w http.ResponseWriter, r *http.Request) {
