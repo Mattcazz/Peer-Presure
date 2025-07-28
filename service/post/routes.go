@@ -130,11 +130,6 @@ func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err != nil {
-		http.Error(w, "user does not exists (check userID)", http.StatusBadRequest)
-		return
-	}
-
 	comments, err := h.commentStore.GetCommentsFromPost(postID)
 
 	if err != nil {
