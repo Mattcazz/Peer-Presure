@@ -17,11 +17,12 @@ func NewStore(db *sql.DB) *Store {
 
 // CreatePost implements types.PostStore.
 func (s *Store) CreatePost(p types.Post) (*types.Post, error) {
-	query := `INSERT INTO posts (user_id, title, text, img_url, public,created_at)
-	VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`
+	query := `INSERT INTO posts (user_id, username,title, text, img_url, public,created_at)
+	VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`
 
 	row, err := s.db.Query(query,
 		p.UserId,
+		p.Username,
 		p.Title,
 		p.Text,
 		p.ImgURL,
@@ -121,6 +122,7 @@ func scanPostRow(r *sql.Rows) (*types.Post, error) {
 	err := r.Scan(
 		&post.ID,
 		&post.UserId,
+		&post.Username,
 		&post.Title,
 		&post.Text,
 		&post.ImgURL,

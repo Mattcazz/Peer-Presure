@@ -66,7 +66,7 @@ func (h *Handler) handleHomeUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "WTF!!", http.StatusBadRequest)
 	}
 
-	web.RenderTemplate(w, "feed", map[string]any{"posts": posts})
+	web.RenderTemplate(w, "feed", map[string]any{"Posts": posts})
 }
 
 func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {

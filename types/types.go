@@ -40,12 +40,13 @@ type PostStore interface {
 }
 
 type Post struct {
-	ID     int    `json:"id"`
-	UserId int    `json:"user_id"`
-	Title  string `json:"title"`
-	Text   string `json:"text"`
-	ImgURL string `json:"img_url"`
-	Public bool   `json:"public"`
+	ID       int    `json:"id"`
+	UserId   int    `json:"user_id"`
+	Username string `json:"username"`
+	Title    string `json:"title"`
+	Text     string `json:"text"`
+	ImgURL   string `json:"img_url"`
+	Public   bool   `json:"public"`
 
 	CreatedAt time.Time `json:"created_at"`
 }

@@ -15,14 +15,12 @@ import (
 type Handler struct {
 	postStore    types.PostStore
 	commentStore types.CommentStore
-	userStore    types.UserStore
 }
 
-func NewHandler(ps types.PostStore, cs types.CommentStore, us types.UserStore) *Handler {
+func NewHandler(ps types.PostStore, cs types.CommentStore) *Handler {
 	return &Handler{
 		postStore:    ps,
 		commentStore: cs,
-		userStore:    us,
 	}
 }
 
@@ -52,6 +50,7 @@ func (h *Handler) handleCreatePostPost(w http.ResponseWriter, r *http.Request) {
 	}
 	post.Public = r.FormValue("public") != ""
 	post.UserId = r.Context().Value(types.CtxKeyUserID).(int)
+	post.Username = r.Context().Value(types.CtxKeyUsername).(string)
 
 	p, err := h.postStore.CreatePost(post)
 
@@ -131,8 +130,6 @@ func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username, err := h.userStore.GetUsernameById(post.UserId)
-
 	if err != nil {
 		http.Error(w, "user does not exists (check userID)", http.StatusBadRequest)
 		return
@@ -141,7 +138,7 @@ func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
 		"title":    post.Title,
 		"body":     post.Text,
-		"username": username,
+		"username": post.Username,
 		"img_url":  post.ImgURL,
 		"postID":   post.ID,
 	}

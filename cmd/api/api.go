@@ -37,7 +37,7 @@ func (s *APIServer) Run() error {
 	userHandler := user.NewHandler(userStore, postStore)
 	userHandler.RegisterRoutes(webSubRouter)
 
-	postHandler := post.NewHandler(postStore, commentStore, userStore)
+	postHandler := post.NewHandler(postStore, commentStore)
 	postHandler.RegisterRoutes(webSubRouter)
 
 	commentHandler := comment.NewHandler(commentStore)

@@ -1,6 +1,7 @@
 CREATE TABLE posts (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
+    username varchar (255) NOT NULL, 
     title VARCHAR(55) NOT NULL,
     text VARCHAR(1000) NOT NULL,
     img_url VARCHAR(1000),
