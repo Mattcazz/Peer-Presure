@@ -42,8 +42,23 @@
 					</div>
 
 					<div class="d-flex justify-content-end mt-4">
-						<a href="/post/{{ .postID }}/comment" class="btn btn-outline-light">Comment</a>
+						<button 
+					     type="button" 
+					     class="btn btn-outline-light"
+					     hx-post="/comment/{{ .postID }}"
+					     hx-vals='{"post_id": "{{ .postID }}"}'
+					     hx-target="#comment-form"
+					     hx-swap="outerHTML"
+					     >
+					     Comment
+						</button>
 					</div>
+				</div>
+				
+				<div id="comment-form">
+				{{ if .Comment }}
+					{{ template "comment-form" . }}
+				{{ end }}
 				</div>
 
 				<!-- Comments Container -->
@@ -55,4 +70,17 @@
 		</div>
 	</body>
 </html>
+{{ end }}
+
+{{ define "comment-form" }}
+<div class="bg-dark text-light p-4 rounded border border-secondary mb-4" >
+	<form hx-post="/post/{{ .postID }}/comment">
+		<div class="mb-3">
+			<textarea name="body" class="form-control bg-dark text-light border-secondary" placeholder="Write your comment..." rows="3" required></textarea>
+		</div>
+		<div class="d-flex justify-content-end">
+			<button type="submit" class="btn btn-outline-light">Submit Comment</button>
+		</div>
+	</form>
+</div>
 {{ end }}

@@ -8,6 +8,7 @@ import (
 	"github.com/Mattcazz/Peer-Presure.git/service/auth"
 	"github.com/Mattcazz/Peer-Presure.git/types"
 	"github.com/Mattcazz/Peer-Presure.git/utils"
+	"github.com/Mattcazz/Peer-Presure.git/web"
 	"github.com/gorilla/mux"
 )
 
@@ -21,12 +22,23 @@ func NewHandler(s types.CommentStore) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(r *mux.Router) {
+	r.HandleFunc("/comment/{id}", h.handleStartComment).Methods(http.MethodPost)
 	r.HandleFunc("/post/{id}/comments", h.handleGetPostComments).Methods(http.MethodGet)
 	r.HandleFunc("/username/comments", auth.JWTAuth(h.handleGetUserComments)).Methods(http.MethodGet)
 	r.HandleFunc("/post/{id}/comment", auth.JWTAuth(h.handleCreateComment)).Methods(http.MethodPost)
 	r.HandleFunc("/post/{post_id}/comment/{comment_id}", auth.JWTAuth(h.handleDeleteComment)).Methods(http.MethodDelete)
 }
 
+func (h *Handler) handleStartComment(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postIDStr := vars["id"]
+
+	postID, err := strconv.Atoi(postIDStr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	web.RenderTemplate(w, "comment-form", map[string]any{ "Comment": true, "postID": postID })
+}
 func (h *Handler) handleGetPostComments(w http.ResponseWriter, r *http.Request) {
 	/*	vars := mux.Vars(r)
 		postIDStr := vars["id"]
@@ -71,7 +83,7 @@ func (h *Handler) handleGetUserComments(w http.ResponseWriter, r *http.Request) 
 func (h *Handler) handleCreateComment(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
-	postIDStr := vars["post_id"]
+	postIDStr := vars["id"]
 
 	postID, err := strconv.Atoi(postIDStr)
 
@@ -91,7 +103,7 @@ func (h *Handler) handleCreateComment(w http.ResponseWriter, r *http.Request) {
 
 	comment.PostID = postID
 
-	if r.FormValue("text") == "" {
+	if r.FormValue("body") == "" {
 		http.Error(w, "a comment needs to have text", http.StatusBadRequest)
 		return
 	}
