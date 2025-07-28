@@ -4,21 +4,30 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 )
 
-var baseTemplate *template.Template
+var templates *template.Template
 
 func LoadTemplates() {
 	var err error
-	baseTemplate, err = template.ParseFiles("web/templates/base.html")
+	templates, err = template.ParseGlob("web/templates/*.html")
 	if err != nil {
-		log.Fatalf("failed to parse base template: %v", err)
+		log.Fatalf("failed to parse templates")
 	}
 }
 
-func RenderTemplate(w http.ResponseWriter, templateName string, title string, data map[string]any) {
+func RenderTemplate(w http.ResponseWriter, templateName string, data map[string]any) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	err := templates.ExecuteTemplate(w, templateName, data)
+	if err != nil {
+		log.Printf("Template execution error (%s): %v", templateName, err)
+		http.Error(w, "Failed to render template", http.StatusInternalServerError)
+	}
+}
+
+/*
+func RenderTemplate2(w http.ResponseWriter, templateName string, title string, data map[string]any) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	contentPath := filepath.Join("web/templates", templateName+".html")
@@ -48,3 +57,4 @@ func RenderTemplate(w http.ResponseWriter, templateName string, title string, da
 		http.Error(w, "Failed to render template", http.StatusInternalServerError)
 	}
 }
+*/

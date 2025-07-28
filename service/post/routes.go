@@ -28,8 +28,8 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/post", auth.JWTAuth(h.handleCreatePostGet)).Methods(http.MethodGet)
 	r.HandleFunc("/post", auth.JWTAuth(h.handleCreatePostPost)).Methods(http.MethodPost)
 	r.HandleFunc("/{user}/posts", auth.JWTAuth(h.handleGetUserPosts)).Methods(http.MethodGet)
-	r.HandleFunc("/post/{id}", auth.JWTAuth(h.handleDeletePost)).Methods(http.MethodDelete)
 	r.HandleFunc("/post/{id}", h.handleGetPost).Methods(http.MethodGet)
+	r.HandleFunc("/post/{id}", auth.JWTAuth(h.handleDeletePost)).Methods(http.MethodDelete)
 }
 
 func (h *Handler) handleCreatePostPost(w http.ResponseWriter, r *http.Request) {
@@ -58,12 +58,13 @@ func (h *Handler) handleCreatePostPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, &p)
-
+	w.Header().Set("HX-Redirect", "/post/"+strconv.Itoa(p.ID))
+	w.WriteHeader(http.StatusOK)
+	// utils.WriteJSON(w, http.StatusOK, &p)
 }
 
 func (h *Handler) handleCreatePostGet(w http.ResponseWriter, r *http.Request) {
-	web.RenderTemplate(w, "create-post", "Create Post", map[string]any{})
+	web.RenderTemplate(w, "create-post", map[string]any{})
 }
 
 func (h *Handler) handleDeletePost(w http.ResponseWriter, r *http.Request) {
@@ -114,6 +115,7 @@ func (h *Handler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
+<<<<<<< HEAD
 	// get post from store
 	/*	vars := mux.Vars(r)
 
@@ -135,4 +137,29 @@ func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
 
 		// render your template sending post
 	*/
+=======
+	vars := mux.Vars(r)
+	id := vars["id"]
+	postID, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+
+	post, err := h.postStore.GetPostById(postID)
+	if err != nil {
+		http.Error(w, "Post doesn't exist", http.StatusBadRequest)
+		return
+	}
+
+	username := post.UserId
+
+	data := map[string]any{
+		"title": post.Title,
+		"body": post.Text,
+		"username": username,
+		"img_url": post.ImgURL,
+	}
+	web.RenderTemplate(w, "post-page", data)
+>>>>>>> post-page
 }
