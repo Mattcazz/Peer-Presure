@@ -112,7 +112,7 @@ func (h *Handler) handleCreateComment(w http.ResponseWriter, r *http.Request) {
 
 	userID, ok := r.Context().Value(types.CtxKeyUserID).(int)
 
-	if ok {
+	if !ok {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
@@ -126,7 +126,7 @@ func (h *Handler) handleCreateComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// redirect to post comments url
-	w.Header().Set("HX-Redirect", fmt.Sprintf("/post/%s/comments", postID))
+	w.Header().Set("HX-Redirect", fmt.Sprintf("/post/%d/comments", postID))
 	w.WriteHeader(http.StatusNoContent)
 }
 
