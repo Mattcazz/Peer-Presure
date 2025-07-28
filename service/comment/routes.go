@@ -39,6 +39,7 @@ func (h *Handler) handleStartComment(w http.ResponseWriter, r *http.Request) {
 	}
 	web.RenderTemplate(w, "comment-form", map[string]any{"Comment": true, "postID": postID})
 }
+
 func (h *Handler) handleGetPostComments(w http.ResponseWriter, r *http.Request) {
 	/*	vars := mux.Vars(r)
 		postIDStr := vars["id"]
@@ -116,7 +117,15 @@ func (h *Handler) handleCreateComment(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
+
+	username, ok := r.Context().Value(types.CtxKeyUsername).(string)
+
+	if !ok {
+		http.Error(w, "invalid username", http.StatusBadRequest)
+		return
+	}
 	comment.UserID = userID
+	comment.Username = username
 
 	_, err = h.store.CreateComment(&comment)
 

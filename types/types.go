@@ -59,10 +59,11 @@ type CommentStore interface {
 }
 
 type Comment struct {
-	ID     int
-	UserID int
-	PostID int
-	Text   string
+	ID       int
+	UserID   int
+	PostID   int
+	Username string
+	Text     string
 
 	CreatedAt time.Time `json:"created_at"`
 }

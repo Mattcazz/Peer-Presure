@@ -15,13 +15,14 @@ func NewStore(db *sql.DB) *Store {
 }
 
 func (s *Store) CreateComment(c *types.Comment) (*types.Comment, error) {
-	query := `INSERT INTO comments (user_id, post_id, text, created_at)
+	query := `INSERT INTO comments (user_id, post_id,username, text, created_at)
 	VALUES ($1, $2, $3, $4) RETURNING *`
 
 	row, err := s.db.Query(query,
 		c.UserID,
 		c.PostID,
 		c.Text,
+		c.Username,
 		c.CreatedAt)
 
 	if err != nil {
