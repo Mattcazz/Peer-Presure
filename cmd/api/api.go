@@ -31,13 +31,17 @@ func (s *APIServer) Run() error {
 
 	webSubRouter := router.PathPrefix("/").Subrouter()
 	userStore := user.NewStore(s.db)
-	userHandler := user.NewHandler(userStore)
-	userHandler.RegisterRoutes(webSubRouter)
-
 	postStore := post.NewStore(s.db)
 	commentStore := comment.NewStore(s.db)
+
+	userHandler := user.NewHandler(userStore, postStore)
+	userHandler.RegisterRoutes(webSubRouter)
+
 	postHandler := post.NewHandler(postStore, commentStore, userStore)
 	postHandler.RegisterRoutes(webSubRouter)
+
+	commentHandler := comment.NewHandler(commentStore)
+	commentHandler.RegisterRoutes(webSubRouter)
 
 	web.LoadTemplates()
 	log.Println("Listening on ", s.addr)

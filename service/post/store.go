@@ -90,6 +90,31 @@ func (s *Store) GetPostsFromUser(user_id int) ([]*types.Post, error) {
 	return posts, nil
 }
 
+func (s *Store) GetLastTenPosts() ([]*types.Post, error) {
+	query := ` SELECT * FROM posts 
+			WHERE public = true
+			ORDER BY created_at DESC
+			LIMIT 10 `
+
+	rows, err := s.db.Query(query)
+
+	if err != nil {
+		return nil, err
+	}
+	var posts []*types.Post
+	var post *types.Post
+
+	for rows.Next() {
+		post, err = scanPostRow(rows)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+}
+
 func scanPostRow(r *sql.Rows) (*types.Post, error) {
 	post := new(types.Post)
 

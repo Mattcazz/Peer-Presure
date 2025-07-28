@@ -15,12 +15,15 @@ import (
 )
 
 type Handler struct {
-	store types.UserStore
+	userStore types.UserStore
+	postStore types.PostStore
 }
 
-func NewHandler(s types.UserStore) *Handler {
+func NewHandler(us types.UserStore, ps types.PostStore) *Handler {
 
-	return &Handler{store: s}
+	return &Handler{
+		userStore: us,
+		postStore: ps}
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
@@ -57,7 +60,13 @@ func (h *Handler) handleHomeGuest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleHomeUser(w http.ResponseWriter, r *http.Request) {
-	web.RenderTemplate(w, "feed", map[string]any{})
+	posts, err := h.postStore.GetLastTenPosts()
+
+	if err != nil {
+		http.Error(w, "WTF!!", http.StatusBadRequest)
+	}
+
+	web.RenderTemplate(w, "feed", map[string]any{"posts": posts})
 }
 
 func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
@@ -78,7 +87,7 @@ func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := h.store.GetUserByEmail(payload.Email)
+	u, err := h.userStore.GetUserByEmail(payload.Email)
 
 	if err != nil {
 		web.RenderTemplate(w, "login-form", map[string]any{"Error": "Not found, invalid email or password"})
@@ -136,7 +145,7 @@ func (h *Handler) handleRegisterPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = h.store.GetUserByEmail(payload.Email)
+	_, err = h.userStore.GetUserByEmail(payload.Email)
 
 	if err == nil { // err == nil that means that it found a user with the given email
 		web.RenderTemplate(w, "register-form", map[string]any{"Error": fmt.Sprintf("user with email %s already exists", payload.Email)})
@@ -150,7 +159,7 @@ func (h *Handler) handleRegisterPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.store.CreateUser(types.User{
+	err = h.userStore.CreateUser(types.User{
 		UserName:  payload.UserName,
 		Email:     payload.Email,
 		Password:  hashedPassword,

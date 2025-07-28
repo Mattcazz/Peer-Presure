@@ -36,6 +36,7 @@ type PostStore interface {
 	GetPostsFromUser(int) ([]*Post, error)
 	CreatePost(Post) (*Post, error)
 	DeletePost(int) error
+	GetLastTenPosts() ([]*Post, error)
 }
 
 type Post struct {

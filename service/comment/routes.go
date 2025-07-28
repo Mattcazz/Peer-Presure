@@ -119,5 +119,5 @@ func (h *Handler) handleCreateComment(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleDeleteComment(w http.ResponseWriter, r *http.Request) {
-	
+
 }
