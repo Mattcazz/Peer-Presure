@@ -25,11 +25,16 @@ func NewHandler(s types.UserStore) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
+	router.HandleFunc("/", h.handleHome).Methods(http.MethodGet)
 	router.HandleFunc("/login", h.handleLoginPost).Methods(http.MethodPost)
 	router.HandleFunc("/login", h.handleLoginGet).Methods(http.MethodGet)
 	router.HandleFunc("/register", h.handleRegisterPost).Methods(http.MethodPost)
 	router.HandleFunc("/register", h.handleRegisterGet).Methods(http.MethodGet)
 	router.HandleFunc("/logout", h.handleLogout).Methods(http.MethodPost)
+}
+
+func (h *Handler) handleHome(w http.ResponseWriter, r *http.Request) {
+	web.RenderTemplate(w, "home", "Peer Pressure", map[string]any{})
 }
 
 func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
