@@ -6,6 +6,7 @@ import (
 	"github.com/Mattcazz/Peer-Presure.git/service/auth"
 	"github.com/Mattcazz/Peer-Presure.git/types"
 	"github.com/Mattcazz/Peer-Presure.git/utils"
+	"github.com/Mattcazz/Peer-Presure.git/web"
 	"github.com/gorilla/mux"
 )
 
@@ -22,13 +23,14 @@ func NewHandler(ps types.PostStore, cs types.CommentStore) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(r *mux.Router) {
-	r.HandleFunc("/post", auth.JWTAuth(h.handleCreatePost)).Methods(http.MethodPost)
+	r.HandleFunc("/post", auth.JWTAuth(h.handleCreatePostGet)).Methods(http.MethodGet)
+	r.HandleFunc("/post", auth.JWTAuth(h.handleCreatePostPost)).Methods(http.MethodPost)
 	r.HandleFunc("/post", h.handleDeletePost).Methods(http.MethodDelete)
 	r.HandleFunc("/:user/posts", auth.JWTAuth(h.handleGetUserPosts)).Methods(http.MethodGet)
 	r.HandleFunc("/post/:id", h.handleGetPost).Methods(http.MethodPost)
 }
 
-func (h *Handler) handleCreatePost(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleCreatePostPost(w http.ResponseWriter, r *http.Request) {
 
 	var post types.Post
 
@@ -56,6 +58,10 @@ func (h *Handler) handleCreatePost(w http.ResponseWriter, r *http.Request) {
 
 	utils.WriteJSON(w, http.StatusOK, post)
 
+}
+
+func (h *Handler) handleCreatePostGet(w http.ResponseWriter, r *http.Request) {
+	web.RenderTemplate(w, "create-post", "Create Post", map[string]any{})
 }
 
 func (h *Handler) handleDeletePost(w http.ResponseWriter, r *http.Request) {

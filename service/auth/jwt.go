@@ -73,14 +73,14 @@ func JWTAuthWeb(token_string string) (*jwt.Token, error) {
 	token, err := ValidateJWTtoken(token_string)
 
 	if err != nil {
-		return nil, fmt.Errorf("unauthorized: invalid token")
+		return nil, fmt.Errorf("unauthorized: invalid token 1")
 	}
 
 	claims := token.Claims.(jwt.MapClaims)
 
-	if !token.Valid || claims["expiredAt"] == nil || claims["user_id"] == nil {
+	if !token.Valid || claims["expiredAt"] == nil || claims["userID"] == nil {
 
-		return nil, fmt.Errorf("unauthorized: invalid token")
+		return nil, fmt.Errorf("unauthorized: invalid token 2")
 	}
 
 	if time.Now().Unix() > int64(claims["expiredAt"].(float64)) {
