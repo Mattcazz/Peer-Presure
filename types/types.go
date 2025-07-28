@@ -63,8 +63,3 @@ type Comment struct {
 
 	CreatedAt time.Time `json:"created_at"`
 }
-
-type UserInfo struct {
-	UserID   int
-	UserName string
-}
