@@ -148,7 +148,14 @@ func (h *Handler) handleRegisterPost(w http.ResponseWriter, r *http.Request) {
 	_, err = h.userStore.GetUserByEmail(payload.Email)
 
 	if err == nil { // err == nil that means that it found a user with the given email
-		web.RenderTemplate(w, "register-form", map[string]any{"Error": fmt.Sprintf("user with email %s already exists", payload.Email)})
+		web.RenderTemplate(w, "register-form", map[string]any{"Error": fmt.Sprintf("User with email %s already exists", payload.Email)})
+		return
+	}
+
+	_, err = h.userStore.GetUserByUsername(payload.UserName)
+
+	if err == nil { // err == nil that means that it found a user with the given email
+		web.RenderTemplate(w, "register-form", map[string]any{"Error": fmt.Sprintf("Username %s already exists", payload.UserName)})
 		return
 	}
 

@@ -7,8 +7,8 @@ import (
 type UserStore interface {
 	CreateUser(User) error
 	GetUserByEmail(string) (*User, error)
+	GetUserByUsername(string) (*User, error)
 	GetUserById(int) (*User, error)
-	GetUsernameById(int) (string, error)
 }
 
 type RegisterUserPayload struct {
