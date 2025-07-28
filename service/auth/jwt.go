@@ -12,12 +12,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func CreateJWT(secret []byte, userId int) (string, error) {
+func CreateJWT(secret []byte, userId int, userName string) (string, error) {
 	expiration := time.Second * time.Duration(3600*24*7) // 7 days
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id":    strconv.Itoa(userId),
-		"expires_at": time.Now().Add(expiration).Unix(),
+		"userID":    strconv.Itoa(userId),
+		"expiredAt": time.Now().Add(expiration).Unix(),
+		"username":  userName,
 	})
 
 	tokenString, err := token.SignedString(secret)
@@ -49,15 +50,18 @@ func JWTAuth(next func(w http.ResponseWriter, r *http.Request)) func(w http.Resp
 
 		claims := token.Claims.(jwt.MapClaims)
 
-		id, err := strconv.Atoi(claims["user_id"].(string))
+		id, err := strconv.Atoi(claims["userID"].(string))
 
 		if err != nil {
 			utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized: Id needs to be an int"))
 			return
 		}
+		username := claims["username"].(string)
 
 		// we add user_id to context so that we can access it later using r.Context().Value("user_id").(int)
-		ctx := context.WithValue(r.Context(), "user_id", id)
+		ctx := context.WithValue(r.Context(), ctxKeyUserID, id)
+		// we add username to context so that we can access it later using r.Context().Value("username").(string)
+		ctx = context.WithValue(ctx, ctxUsername, username)
 
 		next(w, r.WithContext(ctx))
 
@@ -74,12 +78,12 @@ func JWTAuthWeb(token_string string) (*jwt.Token, error) {
 
 	claims := token.Claims.(jwt.MapClaims)
 
-	if !token.Valid || claims["expires_at"] == nil || claims["user_id"] == nil {
+	if !token.Valid || claims["expiredAt"] == nil || claims["user_id"] == nil {
 
 		return nil, fmt.Errorf("unauthorized: invalid token")
 	}
 
-	if time.Now().Unix() > int64(claims["expires_at"].(float64)) {
+	if time.Now().Unix() > int64(claims["expiredAt"].(float64)) {
 		return nil, fmt.Errorf("unauthorized: expired token")
 	}
 
@@ -97,3 +101,10 @@ func ValidateJWTtoken(tokenString string) (*jwt.Token, error) {
 
 	return token, err
 }
+
+type ctxKey string
+
+const (
+	ctxKeyUserID ctxKey = "user_id"
+	ctxUsername  ctxKey = "username"
+)

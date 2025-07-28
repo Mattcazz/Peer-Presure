@@ -21,9 +21,9 @@ func NewHandler(ps types.PostStore, cs types.CommentStore) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(r *mux.Router) {
-	r.HandleFunc("/post", h.handleCreatePost).Methods(http.MethodPost)
+	r.HandleFunc("/post", auth.JWTAuth(h.handleCreatePost)).Methods(http.MethodPost)
 	r.HandleFunc("/post", h.handleDeletePost).Methods(http.MethodDelete)
-	r.HandleFunc("/user/posts", auth.JWTAuth(h.handleGetUserPosts)).Methods(http.MethodGet)
+	r.HandleFunc("/:user/posts", auth.JWTAuth(h.handleGetUserPosts)).Methods(http.MethodGet)
 	r.HandleFunc("/post/:id", h.handleGetPost).Methods(http.MethodPost)
 }
 
