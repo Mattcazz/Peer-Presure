@@ -47,16 +47,16 @@ func (h *Handler) handleCreatePostPost(w http.ResponseWriter, r *http.Request) {
 		post.ImgURL = r.FormValue("image")
 	}
 	post.Public = r.FormValue("public") != ""
-	post.UserId = r.Context().Value("username").(int)
+	post.UserId = r.Context().Value(types.CtxKeyUserID).(int)
 
-	err = h.postStore.CreatePost(post)
+	p, err := h.postStore.CreatePost(post)
 
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, post)
+	utils.WriteJSON(w, http.StatusOK, &p)
 
 }
 

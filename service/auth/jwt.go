@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Mattcazz/Peer-Presure.git/types"
 	"github.com/Mattcazz/Peer-Presure.git/utils"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -59,9 +60,9 @@ func JWTAuth(next func(w http.ResponseWriter, r *http.Request)) func(w http.Resp
 		username := claims["username"].(string)
 
 		// we add user_id to context so that we can access it later using r.Context().Value("user_id").(int)
-		ctx := context.WithValue(r.Context(), ctxKeyUserID, id)
+		ctx := context.WithValue(r.Context(), types.CtxKeyUserID, id)
 		// we add username to context so that we can access it later using r.Context().Value("username").(string)
-		ctx = context.WithValue(ctx, ctxUsername, username)
+		ctx = context.WithValue(ctx, types.CtxKeyUsername, username)
 
 		next(w, r.WithContext(ctx))
 
@@ -101,10 +102,3 @@ func ValidateJWTtoken(tokenString string) (*jwt.Token, error) {
 
 	return token, err
 }
-
-type ctxKey string
-
-const (
-	ctxKeyUserID ctxKey = "user_id"
-	ctxUsername  ctxKey = "username"
-)

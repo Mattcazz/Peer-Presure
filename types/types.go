@@ -33,7 +33,7 @@ type User struct {
 type PostStore interface {
 	GetPostById(int) (*Post, error)
 	GetPostsFromUser(int) ([]*Post, error)
-	CreatePost(Post) error
+	CreatePost(Post) (*Post, error)
 	DeletePost(int) error
 }
 
@@ -63,3 +63,10 @@ type Comment struct {
 
 	CreatedAt time.Time `json:"created_at"`
 }
+
+type ctxKey string
+
+const (
+	CtxKeyUserID   ctxKey = "user_id"
+	CtxKeyUsername ctxKey = "username"
+)

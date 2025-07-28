@@ -16,11 +16,11 @@ func NewStore(db *sql.DB) *Store {
 }
 
 // CreatePost implements types.PostStore.
-func (s *Store) CreatePost(p types.Post) error {
-	query := `INSERT INTO TABLE posts (user_id, title, text, img_url, public,created_at)
-	VALUES ($1,$2,$3,$4,$5,$6)`
+func (s *Store) CreatePost(p types.Post) (*types.Post, error) {
+	query := `INSERT INTO posts (user_id, title, text, img_url, public,created_at)
+	VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`
 
-	_, err := s.db.Query(query,
+	row, err := s.db.Query(query,
 		p.UserId,
 		p.Title,
 		p.Text,
@@ -28,7 +28,11 @@ func (s *Store) CreatePost(p types.Post) error {
 		p.Public,
 		p.CreatedAt)
 
-	return err
+	if row.Next() {
+		return scanPostRow(row)
+	}
+
+	return nil, err
 }
 
 // DeletePost implements types.PostStore.

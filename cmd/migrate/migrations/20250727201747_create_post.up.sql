@@ -3,7 +3,7 @@ CREATE TABLE posts (
     user_id INTEGER NOT NULL,
     title VARCHAR(55) NOT NULL,
     text VARCHAR(1000) NOT NULL,
-    img_url TEXT,
+    img_url VARCHAR(1000),
     public BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

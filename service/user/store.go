@@ -71,8 +71,8 @@ func scanUserRow(row *sql.Rows) (*types.User, error) {
 
 	err := row.Scan(
 		&user.ID,
-		&user.UserName,
 		&user.Email,
+		&user.UserName,
 		&user.Password,
 		&user.CreatedAt)
 
