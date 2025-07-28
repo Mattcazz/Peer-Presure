@@ -115,29 +115,6 @@ func (h *Handler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
-<<<<<<< HEAD
-	// get post from store
-	/*	vars := mux.Vars(r)
-
-		idStr := vars["id"]
-
-		id, err := strconv.Atoi(idStr)
-
-		if err != nil {
-			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error: invalid post ID"))
-			return
-		}
-
-		post, err := h.postStore.GetPostById(id)
-
-		if err != nil {
-			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error: post does not exist"))
-			return
-		}
-
-		// render your template sending post
-	*/
-=======
 	vars := mux.Vars(r)
 	id := vars["id"]
 	postID, err := strconv.Atoi(id)
@@ -161,5 +138,4 @@ func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
 		"img_url": post.ImgURL,
 	}
 	web.RenderTemplate(w, "post-page", data)
->>>>>>> post-page
 }
