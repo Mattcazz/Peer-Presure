@@ -34,7 +34,31 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 }
 
 func (h *Handler) handleHome(w http.ResponseWriter, r *http.Request) {
-	web.RenderTemplate(w, "home", "Peer Pressure", map[string]any{})
+	cookie, err := r.Cookie("auth_token")
+	if err != nil {
+		h.handleHomeGuest(w, r)
+		return
+	}
+
+	tokenString := cookie.Value
+
+	_, err = auth.JWTAuthWeb(tokenString)
+	
+	if (err != nil) {
+		h.handleHomeGuest(w, r)
+		return
+	}
+
+	h.handleHomeUser(w, r)
+
+}
+
+func (h *Handler) handleHomeGuest(w http.ResponseWriter, r *http.Request) {
+	web.RenderTemplate(w, "home", "PeerPressure", map[string]any{})
+}
+
+func (h *Handler) handleHomeUser(w http.ResponseWriter, r *http.Request) {
+	web.RenderTemplate(w, "feed", "PeerPressure", map[string]any{})
 }
 
 func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
