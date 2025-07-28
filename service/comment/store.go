@@ -15,8 +15,8 @@ func NewStore(db *sql.DB) *Store {
 }
 
 func (s *Store) CreateComment(c *types.Comment) (*types.Comment, error) {
-	query := `INSERT INTO comments (user_id, post_id,username, text, created_at)
-	VALUES ($1, $2, $3, $4) RETURNING *`
+	query := `INSERT INTO comments (user_id, post_id, text, username, created_at)
+	VALUES ($1, $2, $3, $4, $5) RETURNING *`
 
 	row, err := s.db.Query(query,
 		c.UserID,
