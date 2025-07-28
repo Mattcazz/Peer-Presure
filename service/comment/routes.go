@@ -37,7 +37,7 @@ func (h *Handler) handleStartComment(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
-	web.RenderTemplate(w, "comment-form", map[string]any{ "Comment": true, "postID": postID })
+	web.RenderTemplate(w, "comment-form", map[string]any{"Comment": true, "postID": postID})
 }
 func (h *Handler) handleGetPostComments(w http.ResponseWriter, r *http.Request) {
 	/*	vars := mux.Vars(r)
@@ -126,7 +126,7 @@ func (h *Handler) handleCreateComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// redirect to post comments url
-	w.Header().Set("HX-Redirect", fmt.Sprintf("/post/%d/comments", postID))
+	w.Header().Set("HX-Redirect", fmt.Sprintf("/post/%d", postID))
 	w.WriteHeader(http.StatusNoContent)
 }
 

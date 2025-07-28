@@ -135,12 +135,17 @@ func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := map[string]any{
-		"title":    post.Title,
-		"body":     post.Text,
-		"username": post.Username,
-		"img_url":  post.ImgURL,
-		"postID":   post.ID,
+	comments, err := h.commentStore.GetCommentsFromPost(postID)
+
+	if err != nil {
+		http.Error(w, "error with the post id", http.StatusBadRequest)
+		return
 	}
+
+	data := map[string]any{
+		"Post":     post,
+		"Comments": comments,
+	}
+
 	web.RenderTemplate(w, "post-page", data)
 }
