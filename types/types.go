@@ -51,7 +51,7 @@ type Post struct {
 type CommentStore interface {
 	GetCommentsFromUser(int) ([]*Comment, error)
 	GetCommentsFromPost(int) ([]*Comment, error)
-	CreateComment(*Comment) error
+	CreateComment(*Comment) (*Comment, error)
 	DeleteComment(int) error
 }
 

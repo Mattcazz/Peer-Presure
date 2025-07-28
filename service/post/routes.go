@@ -1,7 +1,9 @@
 package post
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/Mattcazz/Peer-Presure.git/service/auth"
 	"github.com/Mattcazz/Peer-Presure.git/types"
@@ -25,9 +27,9 @@ func NewHandler(ps types.PostStore, cs types.CommentStore) *Handler {
 func (h *Handler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/post", auth.JWTAuth(h.handleCreatePostGet)).Methods(http.MethodGet)
 	r.HandleFunc("/post", auth.JWTAuth(h.handleCreatePostPost)).Methods(http.MethodPost)
-	r.HandleFunc("/post", h.handleDeletePost).Methods(http.MethodDelete)
-	r.HandleFunc("/:user/posts", auth.JWTAuth(h.handleGetUserPosts)).Methods(http.MethodGet)
-	r.HandleFunc("/post/:id", h.handleGetPost).Methods(http.MethodPost)
+	r.HandleFunc("/{user}/posts", auth.JWTAuth(h.handleGetUserPosts)).Methods(http.MethodGet)
+	r.HandleFunc("/post/{id}", auth.JWTAuth(h.handleDeletePost)).Methods(http.MethodDelete)
+	r.HandleFunc("/post/{id}", h.handleGetPost).Methods(http.MethodGet)
 }
 
 func (h *Handler) handleCreatePostPost(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +67,46 @@ func (h *Handler) handleCreatePostGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleDeletePost(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
 
+	idStr := vars["id"]
+
+	id, err := strconv.Atoi(idStr)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error: invalid post ID"))
+		return
+	}
+
+	post, err := h.postStore.GetPostById(id)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error: post does not exist"))
+		return
+	}
+
+	userID := r.Context().Value(types.CtxKeyUserID).(int)
+
+	username, ok := r.Context().Value(types.CtxKeyUsername).(string)
+	if !ok {
+		utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized: username missing"))
+		return
+	}
+
+	if userID != post.UserId {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("unauthorized"))
+		return
+	}
+
+	err = h.postStore.DeletePost(id)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// redirect to getUserPosts
+	http.Redirect(w, r, fmt.Sprintf("/%s/posts", username), http.StatusFound)
 }
 
 func (h *Handler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {
@@ -73,5 +114,25 @@ func (h *Handler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
+	// get post from store
+	/*	vars := mux.Vars(r)
 
+		idStr := vars["id"]
+
+		id, err := strconv.Atoi(idStr)
+
+		if err != nil {
+			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error: invalid post ID"))
+			return
+		}
+
+		post, err := h.postStore.GetPostById(id)
+
+		if err != nil {
+			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error: post does not exist"))
+			return
+		}
+
+		// render your template sending post
+	*/
 }

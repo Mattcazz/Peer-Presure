@@ -28,6 +28,10 @@ func (s *Store) CreatePost(p types.Post) (*types.Post, error) {
 		p.Public,
 		p.CreatedAt)
 
+	if err != nil {
+		return nil, err
+	}
+
 	if row.Next() {
 		return scanPostRow(row)
 	}
