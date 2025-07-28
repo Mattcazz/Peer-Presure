@@ -98,6 +98,7 @@ func scanCommentRow(row *sql.Rows) (*types.Comment, error) {
 		&comment.UserID,
 		&comment.PostID,
 		&comment.Text,
+		&comment.Username,
 		&comment.CreatedAt,
 	)
 
