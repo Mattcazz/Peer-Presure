@@ -2,9 +2,9 @@
 <div class="card bg-dark border-secondary text-light mb-3">
 	<div class="card-body">
 		<h6 class="card-subtitle mb-2 text-muted">
-			@{{ .username }} <span class="text-secondary small">• {{ .created_at }}</span>
+			@{{ .UserID }} <span class="text-secondary small">• {{ .CreatedAt }}</span>
 		</h6>
-		<p class="card-text">{{ .body }}</p>
+		<p class="card-text">{{ .Text }}</p>
 	</div>
 </div>
 {{ end }}
