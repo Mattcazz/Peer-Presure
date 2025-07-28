@@ -108,7 +108,7 @@ func (h *Handler) handleCreateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comment.Text = r.FormValue("text")
+	comment.Text = r.FormValue("body")
 
 	userID, ok := r.Context().Value(types.CtxKeyUserID).(int)
 
