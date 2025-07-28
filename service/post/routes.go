@@ -136,6 +136,7 @@ func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
 		"body": post.Text,
 		"username": username,
 		"img_url": post.ImgURL,
+		"postID": post.ID,
 	}
 	web.RenderTemplate(w, "post-page", data)
 }

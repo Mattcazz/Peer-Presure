@@ -1,0 +1,13 @@
+{{ define "post-comments" }}
+<div id="post-comments">
+	<h4 class="text-light mt-0 mb-4">Comments</h4>
+
+	{{ if .Comments }}
+	{{ range .Comments }}
+	{{ template "comment" . }}
+	{{ end }}
+	{{ else }}
+	<p class="text-light fst-italic">No comments yet.</p>
+	{{ end }}
+</div>
+{{ end }}
