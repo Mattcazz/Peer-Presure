@@ -1,13 +1,15 @@
 {{ define "post" }}
-<div class="card mb-3" hx-target="this" hx-swap="outerHTML">
-	<div class="card-body">
-		<h5 class="card-title">{{ .Title }}</h5>
-		<h6 class="card-subtitle mb-2 text-muted">@{{ .Username }}</h6>
-		<p class="card-text">{{ .Text }}</p>
+<a href="/post/{{ .ID }}" class="text-decoration-none text-reset">
+	<div class="card mb-3" hx-target="this" hx-swap="outerHTML">
+		<div class="card-body">
+			<h5 class="card-title">{{ .Title }}</h5>
+			<h6 class="card-subtitle mb-2 text-muted">@{{ .Username }}</h6>
+			<p class="card-text">{{ .Text }}</p>
 
-		{{ if .ImgURL }}
-		<img src="{{ .ImgURL }}" class="img-fluid rounded mt-3" alt="Post image">
-		{{ end }}
+			{{ if .ImgURL }}
+			<img src="{{ .ImgURL }}" class="img-fluid rounded mt-3" alt="Post image">
+			{{ end }}
+		</div>
 	</div>
-</div>
+</a>
 {{ end }}
