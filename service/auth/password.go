@@ -19,3 +19,4 @@ func ValidatePassword(hashed, plain []byte) bool {
 
 	return err == nil
 }
+

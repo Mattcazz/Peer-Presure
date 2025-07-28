@@ -29,7 +29,7 @@ func CreateJWT(secret []byte, userId int) (string, error) {
 	return tokenString, nil
 }
 
-func JwtAuth(next func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
+func JWTAuth(next func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		cookie, err := r.Cookie("auth_token")
@@ -40,24 +40,14 @@ func JwtAuth(next func(w http.ResponseWriter, r *http.Request)) func(w http.Resp
 
 		token_string := cookie.Value
 
-		token, err := ValidateJWTtoken(token_string)
+		token, err := JWTAuthWeb(token_string)
 
 		if err != nil {
-			utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized: invalid token"))
+			utils.WriteError(w, http.StatusUnauthorized, err)
 			return
 		}
 
 		claims := token.Claims.(jwt.MapClaims)
-
-		if !token.Valid || claims["expires_at"] == nil || claims["user_id"] == nil {
-			utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized: invalid token"))
-			return
-		}
-
-		if time.Now().Unix() > int64(claims["expires_at"].(float64)) {
-			utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized: expired token"))
-			return
-		}
 
 		id, err := strconv.Atoi(claims["user_id"].(string))
 
@@ -72,6 +62,28 @@ func JwtAuth(next func(w http.ResponseWriter, r *http.Request)) func(w http.Resp
 		next(w, r.WithContext(ctx))
 
 	}
+}
+
+func JWTAuthWeb(token_string string) (*jwt.Token, error) {
+
+	token, err := ValidateJWTtoken(token_string)
+
+	if err != nil {
+		return nil, fmt.Errorf("unauthorized: invalid token")
+	}
+
+	claims := token.Claims.(jwt.MapClaims)
+
+	if !token.Valid || claims["expires_at"] == nil || claims["user_id"] == nil {
+
+		return nil, fmt.Errorf("unauthorized: invalid token")
+	}
+
+	if time.Now().Unix() > int64(claims["expires_at"].(float64)) {
+		return nil, fmt.Errorf("unauthorized: expired token")
+	}
+
+	return token, nil
 }
 
 func ValidateJWTtoken(tokenString string) (*jwt.Token, error) {
