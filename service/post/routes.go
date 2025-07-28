@@ -15,14 +15,14 @@ import (
 type Handler struct {
 	postStore    types.PostStore
 	commentStore types.CommentStore
-	UserStore    types.UserStore
+	userStore    types.UserStore
 }
 
 func NewHandler(ps types.PostStore, cs types.CommentStore, us types.UserStore) *Handler {
 	return &Handler{
 		postStore:    ps,
 		commentStore: cs,
-		UserStore:    us,
+		userStore:    us,
 	}
 }
 
@@ -62,7 +62,6 @@ func (h *Handler) handleCreatePostPost(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("HX-Redirect", "/post/"+strconv.Itoa(p.ID))
 	w.WriteHeader(http.StatusOK)
-	// utils.WriteJSON(w, http.StatusOK, &p)
 }
 
 func (h *Handler) handleCreatePostGet(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +108,8 @@ func (h *Handler) handleDeletePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// redirect to getUserPosts
-	http.Redirect(w, r, fmt.Sprintf("/%s/posts", username), http.StatusFound)
+	w.Header().Set("HX-Redirect", fmt.Sprintf("/%s/posts", username))
+	w.WriteHeader(http.StatusNoContent) // Or you can return a success snippet instead
 }
 
 func (h *Handler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {
@@ -131,9 +131,7 @@ func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
-	username, err := h.UserStore.GetUsernameById(post.UserId)
-
+	username, err := h.userStore.GetUsernameById(post.UserId)
 
 	if err != nil {
 		http.Error(w, "user does not exists (check userID)", http.StatusBadRequest)

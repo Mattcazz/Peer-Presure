@@ -11,7 +11,6 @@ import (
 	"github.com/Mattcazz/Peer-Presure.git/types"
 	"github.com/Mattcazz/Peer-Presure.git/utils"
 	"github.com/Mattcazz/Peer-Presure.git/web"
-	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 )
 
@@ -43,8 +42,8 @@ func (h *Handler) handleHome(w http.ResponseWriter, r *http.Request) {
 	tokenString := cookie.Value
 
 	_, err = auth.JWTAuthWeb(tokenString)
-	
-	if (err != nil) {
+
+	if err != nil {
 		h.handleHomeGuest(w, r)
 		return
 	}
@@ -63,35 +62,31 @@ func (h *Handler) handleHomeUser(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
 
-	log.Printf("handleLogin called")
 	var payload types.LoginUserPayload
 	err := r.ParseForm()
-	// err := utils.ParseJSON(r, &payload)
 
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		web.RenderTemplate(w, "login-form", map[string]any{"Error": err.Error()})
 		return
 	}
 
 	payload.Email = r.FormValue("email")
 	payload.Password = r.FormValue("password")
 
-	log.Printf("Got POST request with email '%v' and password '%v'\n", payload.Email, payload.Password)
-
 	if err := utils.Validate.Struct(payload); err != nil {
-		errors := err.(validator.ValidationErrors)
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload %s", errors))
+		web.RenderTemplate(w, "login-form", map[string]any{"Error": "Invalid data. Please fill all fields"})
+		return
 	}
 
 	u, err := h.store.GetUserByEmail(payload.Email)
 
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found, invalid email or password"))
+		web.RenderTemplate(w, "login-form", map[string]any{"Error": "Not found, invalid email or password"})
 		return
 	}
 
 	if !auth.ValidatePassword(u.Password, []byte(payload.Password)) {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not found, invalid email or password"))
+		web.RenderTemplate(w, "login-form", map[string]any{"Error": "Not found, invalid email or password"})
 		return
 	}
 
@@ -100,7 +95,7 @@ func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
 	token, err := auth.CreateJWT([]byte(secret), u.ID, u.UserName)
 
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		web.RenderTemplate(w, "login-form", map[string]any{"Error": "Unauthorized"})
 		return
 	}
 
@@ -126,7 +121,7 @@ func (h *Handler) handleRegisterPost(w http.ResponseWriter, r *http.Request) {
 	// err := utils.ParseJSON(r, &payload)
 
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		web.RenderTemplate(w, "register-form", map[string]any{"Error": err.Error()})
 	}
 
 	payload.Email = r.FormValue("email")
@@ -136,22 +131,22 @@ func (h *Handler) handleRegisterPost(w http.ResponseWriter, r *http.Request) {
 	log.Println(payload)
 
 	if err := utils.Validate.Struct(payload); err != nil {
-		errors := err.(validator.ValidationErrors)
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload %s", errors))
+		web.RenderTemplate(w, "register-form", map[string]any{"Error": "Invalid data. Please fill all fields"})
+
 		return
 	}
 
 	_, err = h.store.GetUserByEmail(payload.Email)
 
 	if err == nil { // err == nil that means that it found a user with the given email
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user with email %s already exists", payload.Email))
+		web.RenderTemplate(w, "register-form", map[string]any{"Error": fmt.Sprintf("user with email %s already exists", payload.Email)})
 		return
 	}
 
 	hashedPassword, err := auth.HashPassword(payload.Password)
 
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		web.RenderTemplate(w, "register-form", map[string]any{"Error": err.Error()})
 		return
 	}
 
@@ -163,7 +158,7 @@ func (h *Handler) handleRegisterPost(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		web.RenderTemplate(w, "register-form", map[string]any{"Error": err.Error()})
 		return
 	}
 
