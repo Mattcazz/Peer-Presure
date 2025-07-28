@@ -25,28 +25,28 @@
 				<!-- Post Container -->
 				<div class="bg-dark text-light p-4 rounded border border-secondary mb-4">
 					<div class="text-center mb-3">
-						<h1 class="display-5">{{ .title }}</h1>
-						<p>Posted by <strong>@{{ .username }}</strong></p>
+						<h1 class="display-5">{{ .Post.Title }}</h1>
+						<p>Posted by <strong>@{{ .Post.Username }}</strong></p>
 					</div>
 
 					<hr class="border-secondary" />
 
 					{{ if .img_url }}
 					<div class="text-center mb-4">
-						<img src="{{ .img_url }}" alt="Post image" class="img-fluid rounded shadow-sm">
+						<img src="{{ .Post.ImgURL }}" alt="Post image" class="img-fluid rounded shadow-sm">
 					</div>
 					{{ end }}
 
 					<div class="post-body fs-5 lh-base">
-						<p>{{ .body }}</p>
+						<p>{{ .Post.Text }}</p>
 					</div>
 
 					<div class="d-flex justify-content-end mt-4">
 						<button 
 					     type="button" 
 					     class="btn btn-outline-light"
-					     hx-post="/comment/{{ .postID }}"
-					     hx-vals='{"post_id": "{{ .postID }}"}'
+					     hx-post="/comment/{{ .Post.ID }}"
+					     hx-vals='{"post_id": "{{ .Post.ID }}"}'
 					     hx-target="#comment-form"
 					     hx-swap="outerHTML"
 					     >
