@@ -57,8 +57,9 @@ func (h *Handler) handleCreatePostPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, &p)
-
+	w.Header().Set("HX-Redirect", "/post/"+strconv.Itoa(p.ID))
+	w.WriteHeader(http.StatusOK)
+	// utils.WriteJSON(w, http.StatusOK, &p)
 }
 
 func (h *Handler) handleCreatePostGet(w http.ResponseWriter, r *http.Request) {
