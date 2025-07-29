@@ -69,6 +69,18 @@ func JWTAuth(next func(w http.ResponseWriter, r *http.Request)) func(w http.Resp
 	}
 }
 
+func GetUserIdFromJWT(token *jwt.Token) (int, error) {
+	claims := token.Claims.(jwt.MapClaims)
+
+	id, err := strconv.Atoi(claims["userID"].(string))
+
+	if err != nil {
+		return 0, fmt.Errorf("unauthorized: Id needs to be an int")
+	}
+
+	return id, nil
+}
+
 func JWTAuthWeb(token_string string) (*jwt.Token, error) {
 
 	token, err := ValidateJWTtoken(token_string)

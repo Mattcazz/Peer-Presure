@@ -74,3 +74,5 @@ const (
 	CtxKeyUserID   ctxKey = "user_id"
 	CtxKeyUsername ctxKey = "username"
 )
+
+type Data map[string]any

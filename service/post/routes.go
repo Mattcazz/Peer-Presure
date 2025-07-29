@@ -137,9 +137,27 @@ func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := map[string]any{
+	cookie, err := r.Cookie("auth_token")
+
+	var userID int
+
+	if err != nil {
+		userID = 0
+	} else {
+		tknString := cookie.Value
+		tkn, err := auth.ValidateJWTtoken(tknString)
+
+		if err != nil {
+			userID = 0
+		} else {
+			userID, _ = auth.GetUserIdFromJWT(tkn)
+		}
+	}
+
+	data := types.Data{
 		"Post":     post,
 		"Comments": comments,
+		"UserID":   userID,
 	}
 
 	web.RenderTemplate(w, "post-page", data)

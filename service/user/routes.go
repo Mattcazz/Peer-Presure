@@ -52,7 +52,6 @@ func (h *Handler) handleHome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.handleHomeUser(w, r)
-
 }
 
 func (h *Handler) handleHomeGuest(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +65,11 @@ func (h *Handler) handleHomeUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "WTF!!", http.StatusBadRequest)
 	}
 
-	web.RenderTemplate(w, "feed", map[string]any{"Posts": posts})
+	d := types.Data{
+		"Posts": posts,
+	}
+
+	web.RenderTemplate(w, "feed", d)
 }
 
 func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
