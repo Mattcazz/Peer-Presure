@@ -166,6 +166,9 @@ func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleEditPostGet(w http.ResponseWriter, r *http.Request) {
+
+	userID := r.Context().Value(types.CtxKeyUserID).(int)
+
 	vars := mux.Vars(r)
 	id := vars["id"]
 	postID, err := strconv.Atoi(id)
@@ -180,6 +183,11 @@ func (h *Handler) handleEditPostGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if userID != post.UserId {
+		http.Error(w, "You are not allowed to edit this post", http.StatusBadRequest)
+		return
+	}
+
 	data := types.Data{
 		"Post": post,
 	}
@@ -188,6 +196,9 @@ func (h *Handler) handleEditPostGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleEditPostPost(w http.ResponseWriter, r *http.Request) {
+
+	userID := r.Context().Value(types.CtxKeyUserID).(int)
+
 	vars := mux.Vars(r)
 	id := vars["id"]
 
@@ -197,7 +208,17 @@ func (h *Handler) handleEditPostPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var post types.Post
+	post, err := h.postStore.GetPostById(postID)
+
+	if err != nil {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+
+	if userID != post.UserId {
+		http.Error(w, "You are not allowed to edit this post", http.StatusBadRequest)
+		return
+	}
 
 	err = r.ParseForm()
 
@@ -214,7 +235,7 @@ func (h *Handler) handleEditPostPost(w http.ResponseWriter, r *http.Request) {
 	post.Public = r.FormValue("public") != ""
 	post.ID = postID
 
-	err = h.postStore.EditPost(&post)
+	err = h.postStore.EditPost(post)
 
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
