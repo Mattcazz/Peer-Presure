@@ -102,13 +102,24 @@ func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	secret := os.Getenv("JWT_SECRET")
-
-	token, err := auth.CreateJWT([]byte(secret), u.ID, u.UserName)
+	err = loginUser(w, u.ID, u.UserName)
 
 	if err != nil {
-		web.RenderTemplate(w, "login-form", map[string]any{"Error": "Unauthorized"})
+		web.RenderTemplate(w, "login-form", map[string]any{"Error": err.Error()})
 		return
+	}
+
+	w.Header().Set("HX-Redirect", "/")
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func loginUser(w http.ResponseWriter, userID int, username string) error {
+	secret := os.Getenv("JWT_SECRET")
+
+	token, err := auth.CreateJWT([]byte(secret), userID, username)
+
+	if err != nil {
+		return fmt.Errorf("Unauthorized")
 	}
 
 	http.SetCookie(w, &http.Cookie{
@@ -119,7 +130,7 @@ func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
 		Secure:   false,
 	})
 
-	utils.WriteJSON(w, http.StatusOK, map[string]string{"token": token})
+	return nil
 }
 
 func (h *Handler) handleLoginGet(w http.ResponseWriter, r *http.Request) {
@@ -130,7 +141,6 @@ func (h *Handler) handleRegisterPost(w http.ResponseWriter, r *http.Request) {
 
 	var payload types.RegisterUserPayload
 	err := r.ParseForm()
-	// err := utils.ParseJSON(r, &payload)
 
 	if err != nil {
 		web.RenderTemplate(w, "register-form", map[string]any{"Error": err.Error()})
@@ -169,19 +179,25 @@ func (h *Handler) handleRegisterPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.userStore.CreateUser(types.User{
+	user := &types.User{
 		UserName:  payload.UserName,
 		Email:     payload.Email,
 		Password:  hashedPassword,
 		CreatedAt: time.Now(),
-	})
+	}
+
+	err = h.userStore.CreateUser(user)
 
 	if err != nil {
 		web.RenderTemplate(w, "register-form", map[string]any{"Error": err.Error()})
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusCreated, nil)
+	loginUser(w, user.ID, user.UserName)
+
+	w.Header().Set("HX-Redirect", "/")
+	w.WriteHeader(http.StatusNoContent)
+
 }
 
 func (h *Handler) handleRegisterGet(w http.ResponseWriter, r *http.Request) {
@@ -201,5 +217,6 @@ func (h *Handler) handleLogout(w http.ResponseWriter, r *http.Request) {
 		Secure:   false,
 	})
 
-	utils.WriteJSON(w, http.StatusOK, nil)
+	w.Header().Set("HX-Redirect", "/")
+	w.WriteHeader(http.StatusNoContent)
 }

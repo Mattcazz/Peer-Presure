@@ -139,9 +139,8 @@ func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie, err := r.Cookie("auth_token")
-
 	var userID int
+	cookie, err := r.Cookie("auth_token")
 
 	if err != nil {
 		userID = 0

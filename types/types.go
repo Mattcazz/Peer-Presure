@@ -5,7 +5,7 @@ import (
 )
 
 type UserStore interface {
-	CreateUser(User) error
+	CreateUser(*User) error
 	GetUserByEmail(string) (*User, error)
 	GetUserByUsername(string) (*User, error)
 	GetUserById(int) (*User, error)

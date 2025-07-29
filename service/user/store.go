@@ -32,17 +32,22 @@ func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 	return nil, fmt.Errorf("the search came up with no results")
 }
 
-func (s *Store) CreateUser(user types.User) error {
+func (s *Store) CreateUser(user *types.User) error {
 
 	query := `INSERT INTO users 
 			(username, email, password, created_at)
-			VALUES ($1, $2, $3, $4)`
+			VALUES ($1, $2, $3, $4) RETURNING *`
 
-	_, err := s.db.Query(query,
+	err := s.db.QueryRow(query,
 		user.UserName,
 		user.Email,
 		user.Password,
-		user.CreatedAt)
+		user.CreatedAt).Scan(
+		&user.ID,
+		&user.UserName,
+		&user.Email,
+		&user.Password,
+		&user.CreatedAt)
 
 	return err
 }

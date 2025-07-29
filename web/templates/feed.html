@@ -12,9 +12,22 @@
 		<script src="https://unpkg.com/htmx.org@1.9.2"></script>
 	</head>
 	<body class="bg-dark">
-		<div class="container mt-5">
-			<h1 class="text-light mb-4">Feed</h1>
+		<!-- Header with Logout -->
+		<div class="container mt-3">
+			<div class="d-flex justify-content-between align-items-center mb-4">
+				<h1 class="text-light mb-0">Feed</h1>
+				<button 
+					type="button" 
+					class="btn btn-outline-light"
+					hx-post="/logout"
+					hx-target="body"
+					hx-swap="outerHTML"
+				>
+					Logout
+				</button>
+			</div>
 
+			<!-- Posts -->
 			{{ if .Posts }}
 				{{ range .Posts }}
 					{{ template "post" . }}
