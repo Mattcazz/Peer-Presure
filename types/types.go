@@ -35,6 +35,7 @@ type PostStore interface {
 	GetPostById(int) (*Post, error)
 	GetPostsFromUser(int) ([]*Post, error)
 	CreatePost(Post) (*Post, error)
+	EditPost(*Post) error
 	DeletePost(int) error
 	GetLastTenPosts() ([]*Post, error)
 }

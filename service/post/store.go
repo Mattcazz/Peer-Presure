@@ -116,6 +116,15 @@ func (s *Store) GetLastTenPosts() ([]*types.Post, error) {
 	return posts, nil
 }
 
+func (s *Store) EditPost(post *types.Post) error {
+	query := ` UPDATE posts
+			   SET title = $1, text = $2, img_url = $3, public = $4
+			   WHERE id = $5`
+	_, err := s.db.Query(query, post.Title, post.Text, post.ImgURL, post.Public, post.ID)
+
+	return err
+}
+
 func scanPostRow(r *sql.Rows) (*types.Post, error) {
 	post := new(types.Post)
 

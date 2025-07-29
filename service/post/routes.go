@@ -29,7 +29,9 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/post", auth.JWTAuth(h.handleCreatePostPost)).Methods(http.MethodPost)
 	r.HandleFunc("/{user}/posts", auth.JWTAuth(h.handleGetUserPosts)).Methods(http.MethodGet)
 	r.HandleFunc("/post/{id}", h.handleGetPost).Methods(http.MethodGet)
+	r.HandleFunc("/post/{id}/edit", auth.JWTAuth(h.handleEditPostGet)).Methods(http.MethodGet)
 	r.HandleFunc("/post/{id}", auth.JWTAuth(h.handleDeletePost)).Methods(http.MethodDelete)
+	r.HandleFunc("/post/{id}/edit", auth.JWTAuth(h.handleEditPostPost)).Methods(http.MethodPost)
 }
 
 func (h *Handler) handleCreatePostPost(w http.ResponseWriter, r *http.Request) {
@@ -161,4 +163,64 @@ func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	web.RenderTemplate(w, "post-page", data)
+}
+
+func (h *Handler) handleEditPostGet(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	postID, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+
+	post, err := h.postStore.GetPostById(postID)
+	if err != nil {
+		http.Error(w, "Post doesn't exist", http.StatusBadRequest)
+		return
+	}
+
+	data := types.Data{
+		"Post": post,
+	}
+
+	web.RenderTemplate(w, "edit-post", data)
+}
+
+func (h *Handler) handleEditPostPost(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	postID, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+
+	var post types.Post
+
+	err = r.ParseForm()
+
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	post.Title = r.FormValue("title")
+	post.Text = r.FormValue("body")
+	if r.FormValue("image") != "" {
+		post.ImgURL = r.FormValue("image")
+	}
+	post.Public = r.FormValue("public") != ""
+	post.ID = postID
+
+	err = h.postStore.EditPost(&post)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	w.Header().Set("HX-Redirect", fmt.Sprintf("/post/%d", postID))
+	w.WriteHeader(http.StatusOK)
 }
