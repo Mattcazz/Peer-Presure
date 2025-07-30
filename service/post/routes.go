@@ -110,9 +110,16 @@ func (h *Handler) handleDeletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = h.commentStore.DeleteCommentsFromPost(id)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
 	// redirect to getUserPosts
 	w.Header().Set("HX-Redirect", fmt.Sprintf("/%s/posts", username))
-	w.WriteHeader(http.StatusNoContent) // Or you can return a success snippet instead
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *Handler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {

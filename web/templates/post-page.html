@@ -54,7 +54,16 @@
 						</button>
 
 						{{ if eq .UserID .Post.UserId }}
-							<a href="/post/{{ .Post.ID }}/edit" class="btn btn-outline-light">Edit Post</a>
+							<a href="/post/{{ .Post.ID }}/edit" class="btn btn-outline-light me-2">Edit Post</a>
+							<button 
+					     type="button" 
+					     class="btn btn-outline-danger"
+					     hx-delete="/post/{{ .Post.ID }}"
+					     hx-target="body"
+					     hx-swap="outerHTML"
+					     >
+					     Delete
+						</button>
 						{{ end }}
 					</div>
 				</div>

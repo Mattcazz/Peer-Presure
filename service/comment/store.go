@@ -89,6 +89,14 @@ func (s *Store) GetCommentsFromUser(user_id int) ([]*types.Comment, error) {
 	return comments, nil
 }
 
+func (s *Store) DeleteCommentsFromPost(postId int) error {
+	query := `DELETE FROM comments WHERE post_id = $1`
+
+	_, err := s.db.Query(query, postId)
+
+	return err
+}
+
 func scanCommentRow(row *sql.Rows) (*types.Comment, error) {
 
 	comment := new(types.Comment)
