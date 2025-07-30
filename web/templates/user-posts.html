@@ -17,26 +17,8 @@
 			<div class="d-flex justify-content-between align-items-center mb-4">
 				<h1 class="text-light mb-0">Feed</h1>
 				<div class="d-flex gap-2">
-				<button 
-					type="button" 
-					class="btn btn-outline-primary px-4"
-					hx-get="/post"
-					hx-target="body"
-					hx-swap="outerHTML"
-					hx-push-url="/post"
-				>
-					Post
-				</button>	
-				<button 
-					type="button" 
-					class="btn btn-outline-secondary px-4"
-					hx-get="/home/{{ .Username }}"
-					hx-target="body"
-					hx-swap="outerHTML"
-					hx-push-url="/home/{{ .Username }}"
-				>
-					Feed 
-				</button>
+				<a href="/post" class="btn btn-outline-primary px-4">Post</a>
+				<a href="/home/{{ .Username }}" class="btn btn-outline-secondary px-4">Feed</a>
 				<button 
 					type="button" 
 					class="btn btn-outline-secondary px-4"
