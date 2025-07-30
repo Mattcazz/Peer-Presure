@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/Mattcazz/Peer-Presure.git/service/auth"
 	"github.com/Mattcazz/Peer-Presure.git/types"
@@ -126,6 +127,7 @@ func (h *Handler) handleCreateComment(w http.ResponseWriter, r *http.Request) {
 	}
 	comment.UserID = userID
 	comment.Username = username
+	comment.CreatedAt = time.Now()
 
 	_, err = h.store.CreateComment(&comment)
 

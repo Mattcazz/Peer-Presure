@@ -69,7 +69,7 @@ func (s *Store) GetPostById(post_id int) (*types.Post, error) {
 
 // GetPostsFromUser implements types.PostStore.
 func (s *Store) GetPostsFromUser(username string) ([]*types.Post, error) {
-	query := `SELECT * FROM posts WHERE username = $1`
+	query := `SELECT * FROM posts WHERE username = $1 ORDER BY created_at DESC`
 
 	var posts []*types.Post
 	var post *types.Post

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/Mattcazz/Peer-Presure.git/service/auth"
 	"github.com/Mattcazz/Peer-Presure.git/types"
@@ -55,6 +56,7 @@ func (h *Handler) handleCreatePostPost(w http.ResponseWriter, r *http.Request) {
 	post.Public = r.FormValue("public") != ""
 	post.UserId = r.Context().Value(types.CtxKeyUserID).(int)
 	post.Username = r.Context().Value(types.CtxKeyUsername).(string)
+	post.CreatedAt = time.Now()
 
 	p, err := h.postStore.CreatePost(post)
 

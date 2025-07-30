@@ -61,8 +61,7 @@ func (h *Handler) handleHome(w http.ResponseWriter, r *http.Request) {
 
 	url := fmt.Sprintf("/home/%s", username)
 
-	w.Header().Set("HX-Redirect", url)
-	w.WriteHeader(http.StatusNoContent)
+	http.Redirect(w, r, url, http.StatusSeeOther)
 }
 
 func (h *Handler) handleHomeGuest(w http.ResponseWriter, r *http.Request) {
