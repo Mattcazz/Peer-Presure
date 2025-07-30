@@ -256,9 +256,7 @@ func (h *Handler) handleEditPostPost(w http.ResponseWriter, r *http.Request) {
 
 	post.Title = r.FormValue("title")
 	post.Text = r.FormValue("body")
-	if r.FormValue("image") != "" {
-		post.ImgURL = r.FormValue("image")
-	}
+	post.ImgURL = r.FormValue("image")
 	post.Public = r.FormValue("public") != ""
 	post.ID = postID
 

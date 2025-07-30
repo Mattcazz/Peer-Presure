@@ -50,9 +50,11 @@
 							/>
 
 					<div class="form-check form-switch mb-3">
-						<input class="form-check-input" type="checkbox" role="switch" id="public-switch" name="public" checked />
+						
+						
+						<input class="form-check-input" type="checkbox" role="switch" id="public-switch" name="public" {{ if .Post.Public }} checked {{ end }}/>
 						<label class="form-check-label" for="public-switch">Public</label>
-                        {{ if .Post.Public }}checked{{ end }}
+                        
 					</div>
 
 					<button type="submit" class="btn btn-outline-light w-100">Edit</button>
