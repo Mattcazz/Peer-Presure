@@ -28,7 +28,7 @@ func NewHandler(us types.UserStore, ps types.PostStore) *Handler {
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/", h.handleHome).Methods(http.MethodGet)
-	router.HandleFunc("/home/{username}", h.handleHomeUser).Methods(http.MethodGet)
+	router.HandleFunc("/home/{username}", auth.JWTAuth(h.handleHomeUser)).Methods(http.MethodGet)
 	router.HandleFunc("/login", h.handleLoginPost).Methods(http.MethodPost)
 	router.HandleFunc("/login", h.handleLoginGet).Methods(http.MethodGet)
 	router.HandleFunc("/register", h.handleRegisterPost).Methods(http.MethodPost)
@@ -69,14 +69,35 @@ func (h *Handler) handleHomeGuest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleHomeUser(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	username := vars["username"]
+
+	u, err := h.userStore.GetUserByUsername(username)
+
+	if err != nil {
+		http.Error(w, "User does not exist", http.StatusBadRequest)
+		return
+	}
+
+	userId, ok := r.Context().Value(types.CtxKeyUserID).(int)
+
+	if !ok {
+		http.Error(w, "Error with jwt", http.StatusBadRequest)
+		return
+	}
+
+	if userId != u.ID {
+		http.Error(w, "Unauthorized: you are not this user", http.StatusBadRequest)
+		return
+	}
+
 	posts, err := h.postStore.GetLastTenPosts()
 
 	if err != nil {
 		http.Error(w, "WTF!!", http.StatusBadRequest)
+		return
 	}
-
-	vars := mux.Vars(r)
-	username := vars["username"]
 
 	d := types.Data{
 		"Posts":    posts,
