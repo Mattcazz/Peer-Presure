@@ -15,19 +15,21 @@ import (
 type Handler struct {
 	postStore    types.PostStore
 	commentStore types.CommentStore
+	userStore    types.UserStore
 }
 
-func NewHandler(ps types.PostStore, cs types.CommentStore) *Handler {
+func NewHandler(ps types.PostStore, cs types.CommentStore, us types.UserStore) *Handler {
 	return &Handler{
 		postStore:    ps,
 		commentStore: cs,
+		userStore:    us,
 	}
 }
 
 func (h *Handler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/post", auth.JWTAuth(h.handleCreatePostGet)).Methods(http.MethodGet)
 	r.HandleFunc("/post", auth.JWTAuth(h.handleCreatePostPost)).Methods(http.MethodPost)
-	r.HandleFunc("/{user}/posts", auth.JWTAuth(h.handleGetUserPosts)).Methods(http.MethodGet)
+	r.HandleFunc("/{username}/posts", auth.JWTAuth(h.handleGetUserPosts)).Methods(http.MethodGet)
 	r.HandleFunc("/post/{id}", h.handleGetPost).Methods(http.MethodGet)
 	r.HandleFunc("/post/{id}/edit", auth.JWTAuth(h.handleEditPostGet)).Methods(http.MethodGet)
 	r.HandleFunc("/post/{id}", auth.JWTAuth(h.handleDeletePost)).Methods(http.MethodDelete)
@@ -114,7 +116,24 @@ func (h *Handler) handleDeletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	username := vars["username"]
 
+	_, err := h.userStore.GetUserByUsername(username)
+
+	if err != nil {
+		http.Error(w, "User does not exist", http.StatusBadRequest)
+		return
+	}
+
+	posts, _ := h.postStore.GetPostsFromUser(username)
+
+	data := types.Data{
+		"Posts":    posts,
+		"Username": username,
+	}
+
+	web.RenderTemplate(w, "user-posts", data)
 }
 
 func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {

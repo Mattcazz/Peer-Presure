@@ -68,13 +68,13 @@ func (s *Store) GetPostById(post_id int) (*types.Post, error) {
 }
 
 // GetPostsFromUser implements types.PostStore.
-func (s *Store) GetPostsFromUser(user_id int) ([]*types.Post, error) {
-	query := `SELECT * FROM posts WHERE user_id = $1`
+func (s *Store) GetPostsFromUser(username string) ([]*types.Post, error) {
+	query := `SELECT * FROM posts WHERE username = $1`
 
 	var posts []*types.Post
 	var post *types.Post
 
-	rows, err := s.db.Query(query, user_id)
+	rows, err := s.db.Query(query, username)
 
 	if err != nil {
 		return nil, err

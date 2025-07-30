@@ -33,7 +33,7 @@ type User struct {
 
 type PostStore interface {
 	GetPostById(int) (*Post, error)
-	GetPostsFromUser(int) ([]*Post, error)
+	GetPostsFromUser(string) ([]*Post, error)
 	CreatePost(Post) (*Post, error)
 	EditPost(*Post) error
 	DeletePost(int) error

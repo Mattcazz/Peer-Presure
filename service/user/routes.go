@@ -28,6 +28,7 @@ func NewHandler(us types.UserStore, ps types.PostStore) *Handler {
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/", h.handleHome).Methods(http.MethodGet)
+	router.HandleFunc("/home/{username}", h.handleHomeUser).Methods(http.MethodGet)
 	router.HandleFunc("/login", h.handleLoginPost).Methods(http.MethodPost)
 	router.HandleFunc("/login", h.handleLoginGet).Methods(http.MethodGet)
 	router.HandleFunc("/register", h.handleRegisterPost).Methods(http.MethodPost)
@@ -44,14 +45,24 @@ func (h *Handler) handleHome(w http.ResponseWriter, r *http.Request) {
 
 	tokenString := cookie.Value
 
-	_, err = auth.JWTAuthWeb(tokenString)
+	tkn, err := auth.JWTAuthWeb(tokenString)
 
 	if err != nil {
 		h.handleHomeGuest(w, r)
 		return
 	}
 
-	h.handleHomeUser(w, r)
+	username, err := auth.GetUsernameFromJWT(tkn)
+
+	if err != nil {
+		h.handleHomeGuest(w, r)
+		return
+	}
+
+	url := fmt.Sprintf("/home/%s", username)
+
+	w.Header().Set("HX-Redirect", url)
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *Handler) handleHomeGuest(w http.ResponseWriter, r *http.Request) {
@@ -65,8 +76,12 @@ func (h *Handler) handleHomeUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "WTF!!", http.StatusBadRequest)
 	}
 
+	vars := mux.Vars(r)
+	username := vars["username"]
+
 	d := types.Data{
-		"Posts": posts,
+		"Posts":    posts,
+		"Username": username,
 	}
 
 	web.RenderTemplate(w, "feed", d)
@@ -109,28 +124,8 @@ func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("HX-Redirect", "/")
+	w.Header().Set("HX-Redirect", fmt.Sprintf("/home/%s", u.UserName))
 	w.WriteHeader(http.StatusNoContent)
-}
-
-func loginUser(w http.ResponseWriter, userID int, username string) error {
-	secret := os.Getenv("JWT_SECRET")
-
-	token, err := auth.CreateJWT([]byte(secret), userID, username)
-
-	if err != nil {
-		return fmt.Errorf("Unauthorized")
-	}
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     "auth_token",
-		Value:    token,
-		Expires:  time.Now().Add(24 * time.Hour),
-		HttpOnly: true,
-		Secure:   false,
-	})
-
-	return nil
 }
 
 func (h *Handler) handleLoginGet(w http.ResponseWriter, r *http.Request) {
@@ -195,7 +190,7 @@ func (h *Handler) handleRegisterPost(w http.ResponseWriter, r *http.Request) {
 
 	loginUser(w, user.ID, user.UserName)
 
-	w.Header().Set("HX-Redirect", "/")
+	w.Header().Set("HX-Redirect", fmt.Sprintf("/home/%s", user.UserName))
 	w.WriteHeader(http.StatusNoContent)
 
 }
@@ -219,4 +214,24 @@ func (h *Handler) handleLogout(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("HX-Redirect", "/")
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func loginUser(w http.ResponseWriter, userID int, username string) error {
+	secret := os.Getenv("JWT_SECRET")
+
+	token, err := auth.CreateJWT([]byte(secret), userID, username)
+
+	if err != nil {
+		return fmt.Errorf("Unauthorized")
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    token,
+		Expires:  time.Now().Add(24 * time.Hour),
+		HttpOnly: true,
+		Secure:   false,
+	})
+
+	return nil
 }

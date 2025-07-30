@@ -80,6 +80,17 @@ func GetUserIdFromJWT(token *jwt.Token) (int, error) {
 
 	return id, nil
 }
+func GetUsernameFromJWT(token *jwt.Token) (string, error) {
+	claims := token.Claims.(jwt.MapClaims)
+
+	id, ok := claims["username"].(string)
+
+	if !ok {
+		return "", fmt.Errorf("unauthorized")
+	}
+
+	return id, nil
+}
 
 func JWTAuthWeb(token_string string) (*jwt.Token, error) {
 
