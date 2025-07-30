@@ -45,14 +45,14 @@ func (h *Handler) handleHome(w http.ResponseWriter, r *http.Request) {
 
 	tokenString := cookie.Value
 
-	tkn, err := auth.JWTAuthWeb(tokenString)
+	token, err := auth.JWTAuthWeb(tokenString)
 
 	if err != nil {
 		h.handleHomeGuest(w, r)
 		return
 	}
 
-	username, err := auth.GetUsernameFromJWT(tkn)
+	username, err := auth.GetUsernameFromJWT(token)
 
 	if err != nil {
 		h.handleHomeGuest(w, r)
