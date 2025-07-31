@@ -121,6 +121,13 @@ func (h *Handler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	username := vars["username"]
 
+	currentUser, ok := r.Context().Value(types.CtxKeyUsername).(string)
+
+	if !ok {
+		http.Error(w, "WTF!!", http.StatusBadRequest)
+		return
+	}
+
 	_, err := h.userStore.GetUserByUsername(username)
 
 	if err != nil {
@@ -131,8 +138,9 @@ func (h *Handler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {
 	posts, _ := h.postStore.GetPostsFromUser(username)
 
 	data := types.Data{
-		"Posts":    posts,
-		"Username": username,
+		"Posts":       posts,
+		"Username":    username,
+		"CurrentUser": currentUser,
 	}
 
 	web.RenderTemplate(w, "user-posts", data)

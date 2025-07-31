@@ -18,7 +18,7 @@
 				<h1 class="text-light mb-0">@{{ .Username }} Posts</h1>
 				<div class="d-flex gap-2">
 				<a href="/post" class="btn btn-outline-primary px-4">Post</a>
-				<a href="/home/{{ .Username }}" class="btn btn-outline-secondary px-4">Feed</a>
+				<a href="/home/{{ .CurrentUser }}" class="btn btn-outline-secondary px-4">Feed</a>
 				<button 
 					type="button" 
 					class="btn btn-outline-danger px-4"
