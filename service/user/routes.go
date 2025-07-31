@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/Mattcazz/Peer-Presure.git/service/auth"
@@ -30,6 +31,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/", h.handleHome).Methods(http.MethodGet)
 	router.HandleFunc("/home/{username}", auth.JWTAuth(h.handleHomeUser)).Methods(http.MethodGet)
 	router.HandleFunc("/{username}/friends", auth.JWTAuth(h.handleUserFriends)).Methods(http.MethodGet)
+	router.HandleFunc("/friends/delete", auth.JWTAuth(h.handleDeleteFriend)).Methods(http.MethodPost)
 	router.HandleFunc("/login", h.handleLoginPost).Methods(http.MethodPost)
 	router.HandleFunc("/login", h.handleLoginGet).Methods(http.MethodGet)
 	router.HandleFunc("/register", h.handleRegisterPost).Methods(http.MethodPost)
@@ -81,10 +83,10 @@ func (h *Handler) handleHomeUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId, ok := r.Context().Value(types.CtxKeyUserID).(int)
+	userId, err := utils.GetUserIdFromRequest(r)
 
-	if !ok {
-		http.Error(w, "Error with jwt", http.StatusBadRequest)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -262,6 +264,48 @@ func (h *Handler) handleUserFriends(w http.ResponseWriter, r *http.Request) {
 	}
 
 	web.RenderTemplate(w, "user-friends", data)
+}
+
+func (h *Handler) handleDeleteFriend(w http.ResponseWriter, r *http.Request) {
+	currentUserId, err := utils.GetUserIdFromRequest(r)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = r.ParseForm()
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	otherUserIdStr := r.FormValue("friend_id")
+
+	otherUserId, err := strconv.Atoi(otherUserIdStr)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = h.userStore.DeleteFriend(currentUserId, otherUserId)
+
+	if err != nil {
+		http.Error(w, "This 2 users are not friends", http.StatusBadRequest)
+		return
+	}
+
+	username, err := utils.GetUsernameFromRequest(r)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("HX-Redirect", fmt.Sprintf("/%s/friends", username))
+	w.WriteHeader(http.StatusAccepted)
 }
 
 func loginUser(w http.ResponseWriter, userID int, username string) error {

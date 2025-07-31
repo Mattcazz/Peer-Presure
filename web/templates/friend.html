@@ -5,6 +5,16 @@
 			<h5 class="card-title">@{{ .UserName }}</h5>
 			<h6 class="card-subtitle mb-2 text-muted">{{ .Email }}</h6>
 			<p class="card-text"><small>Friend since: {{ .CreatedAt.Format "Jan 2, 2006" }}</small></p>
+			<!-- Delete Friend Button -->
+			<form 
+				hx-post="/friends/delete"
+				hx-target="closest .card"
+				hx-swap="outerHTML"
+				class="mt-2"
+			>
+				<input type="hidden" name="friend_id" value="{{ .ID }}">
+				<button type="submit" class="btn btn-sm btn-danger">Remove Friend</button>
+			</form>
 		</div>
 	</div>
 </a>

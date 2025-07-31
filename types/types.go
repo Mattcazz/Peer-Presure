@@ -10,6 +10,9 @@ type UserStore interface {
 	GetUserByUsername(string) (*User, error)
 	GetUserById(int) (*User, error)
 	GetUserFriends(int) ([]*User, error)
+	CreateFriendRequest(int, int) error
+	DeleteFriend(int, int) error
+	RespondFriendRequest(int, int, string) error
 }
 
 type RegisterUserPayload struct {

@@ -74,11 +74,8 @@ func (h *Handler) handleCreatePostGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleDeletePost(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
 
-	idStr := vars["id"]
-
-	id, err := strconv.Atoi(idStr)
+	id, err := utils.GetIdFromURL("id", r)
 
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error: invalid post ID"))
@@ -147,9 +144,8 @@ func (h *Handler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-	postID, err := strconv.Atoi(id)
+	postID, err := utils.GetIdFromURL("id", r)
+
 	if err != nil {
 		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
@@ -195,11 +191,15 @@ func (h *Handler) handleGetPost(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) handleEditPostGet(w http.ResponseWriter, r *http.Request) {
 
-	userID := r.Context().Value(types.CtxKeyUserID).(int)
+	userID, err := utils.GetUserIdFromRequest(r)
 
-	vars := mux.Vars(r)
-	id := vars["id"]
-	postID, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	postID, err := utils.GetIdFromURL("id", r)
+
 	if err != nil {
 		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
@@ -227,10 +227,8 @@ func (h *Handler) handleEditPostPost(w http.ResponseWriter, r *http.Request) {
 
 	userID := r.Context().Value(types.CtxKeyUserID).(int)
 
-	vars := mux.Vars(r)
-	id := vars["id"]
+	postID, err := utils.GetIdFromURL("id", r)
 
-	postID, err := strconv.Atoi(id)
 	if err != nil {
 		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return

@@ -114,6 +114,30 @@ func (s *Store) GetUserFriends(userId int) ([]*types.User, error) {
 
 }
 
+func (s *Store) CreateFriendRequest(id1, id2 int) error {
+	_, err := s.db.Query("INSERT INTO friends (user_id1, user_id2) VALUES ($1, $2)", id1, id2)
+
+	return err
+}
+
+func (s *Store) DeleteFriend(id1, id2 int) error {
+
+	query := `DELETE FROM friends 
+			  WHERE (user_id1 = $1 AND user_id2 = $2) OR (user_id1 = $2 AND user_id2 = $1)`
+	_, err := s.db.Query(query, id1, id2)
+
+	return err
+}
+
+func (s *Store) RespondFriendRequest(id1, id2 int, r string) error {
+	query := `UPDATE friends SET status = $3
+			  WHERE (user_id1 = $1 AND user_id2 = $2) OR (user_id1 = $2 AND user_id2 = $1) `
+
+	_, err := s.db.Query(query, r, id1, id2)
+
+	return err
+}
+
 // Private function that returns a user given a row to scan
 func scanUserRow(row *sql.Rows) (*types.User, error) {
 	user := new(types.User)
