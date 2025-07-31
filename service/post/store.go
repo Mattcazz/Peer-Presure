@@ -125,6 +125,36 @@ func (s *Store) EditPost(post *types.Post) error {
 	return err
 }
 
+func (s *Store) GetPostsFromFriends(userId int) ([]*types.Post, error) {
+	query := `SELECT p.* FROM posts p 
+			  JOIN users u ON p.user_id = u.id
+			  JOIN friends f   ON (
+      			(f.user_id1 = $1 AND p.user_id = f.user_id2) OR (f.user_id2 = $1 AND p.user_id = f.user_id1)
+			  )
+			  WHERE p.user_id != $1
+			  ORDER BY p.created_at DESC`
+
+	rows, err := s.db.Query(query, userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var posts []*types.Post
+	var post *types.Post
+
+	for rows.Next() {
+		post, err = scanPostRow(rows)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+
+}
+
 func scanPostRow(r *sql.Rows) (*types.Post, error) {
 	post := new(types.Post)
 

@@ -38,6 +38,7 @@ type PostStore interface {
 	EditPost(*Post) error
 	DeletePost(int) error
 	GetLastTenPosts() ([]*Post, error)
+	GetPostsFromFriends(int) ([]*Post, error)
 }
 
 type Post struct {

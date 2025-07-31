@@ -92,10 +92,10 @@ func (h *Handler) handleHomeUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := h.postStore.GetLastTenPosts()
+	posts, err := h.postStore.GetPostsFromFriends(userId)
 
 	if err != nil {
-		http.Error(w, "WTF!!", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
