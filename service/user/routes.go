@@ -29,6 +29,7 @@ func NewHandler(us types.UserStore, ps types.PostStore) *Handler {
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/", h.handleHome).Methods(http.MethodGet)
 	router.HandleFunc("/home/{username}", auth.JWTAuth(h.handleHomeUser)).Methods(http.MethodGet)
+	router.HandleFunc("/{username}/friends", auth.JWTAuth(h.handleUserFriends)).Methods(http.MethodGet)
 	router.HandleFunc("/login", h.handleLoginPost).Methods(http.MethodPost)
 	router.HandleFunc("/login", h.handleLoginGet).Methods(http.MethodGet)
 	router.HandleFunc("/register", h.handleRegisterPost).Methods(http.MethodPost)
@@ -234,6 +235,33 @@ func (h *Handler) handleLogout(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("HX-Redirect", "/")
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *Handler) handleUserFriends(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	username := vars["username"]
+
+	user, err := h.userStore.GetUserByUsername(username)
+
+	if err != nil {
+		http.Error(w, "User does not exist", http.StatusBadRequest)
+		return
+	}
+
+	friends, err := h.userStore.GetUserFriends(user.ID)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	data := types.Data{
+		"Users":    friends,
+		"Username": username,
+	}
+
+	web.RenderTemplate(w, "user-friends", data)
 }
 
 func loginUser(w http.ResponseWriter, userID int, username string) error {

@@ -1,0 +1,11 @@
+{{ define "friend" }}
+<a href="/{{ .UserName }}/posts" class="text-decoration-none text-reset">
+	<div class="card mb-3" hx-target="this" hx-swap="outerHTML">
+		<div class="card-body">
+			<h5 class="card-title">@{{ .UserName }}</h5>
+			<h6 class="card-subtitle mb-2 text-muted">{{ .Email }}</h6>
+			<p class="card-text"><small>Friend since: {{ .CreatedAt.Format "Jan 2, 2006" }}</small></p>
+		</div>
+	</div>
+</a>
+{{ end }}

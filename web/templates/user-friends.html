@@ -1,0 +1,50 @@
+{{ define "user-friends" }}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your Friends</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous"
+  >
+  <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+</head>
+<body class="bg-dark text-light">
+
+  <div class="container mt-3">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="mb-0">Your Friends</h1>
+      <div class="d-flex gap-2">
+      <a href="/home/{{ .Username}}" class="btn btn-outline-primary px-4"> Feed</a>
+      <button 
+					type="button" 
+					class="btn btn-outline-danger px-4"
+					hx-post="/logout"
+					hx-target="body"
+					hx-swap="outerHTML"
+				>
+					Logout
+				</button>
+        </div>
+    </div>
+
+    <!-- Friends List -->
+    {{ if .Users }}
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {{ range .Users }}
+          {{ template "friend" . }}
+        {{ end }}
+      </div>
+    {{ else }}
+      <p class="fst-italic">You don't have any friends yet.</p>
+    {{ end }}
+
+  </div>
+
+</body>
+</html>
+{{ end }}
