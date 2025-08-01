@@ -140,6 +140,7 @@ func (s *Store) RespondFriendRequest(id1, id2 int, r string) error {
 	return err
 }
 
+
 // Private function that returns a user given a row to scan
 func scanUserRow(row *sql.Rows) (*types.User, error) {
 	user := new(types.User)

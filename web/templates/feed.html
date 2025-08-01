@@ -32,14 +32,22 @@
 				</div>
 			</div>
 
-			<!-- Posts -->
+			<!-- Posts List (HTMX target) -->
+			<div id="post-list">
 			{{ if .Posts }}
 				{{ range .Posts }}
-					{{ template "post" . }}
+				{{ template "post" . }}
 				{{ end }}
 			{{ else }}
 				<p class="text-light fst-italic">No posts from your friends yet.</p>
 			{{ end }}
+			</div>
+
+			<!-- Pagination (HTMX enabled) -->
+			{{ if .Pagination }}
+			{{ template "pagination" .Pagination }}
+			{{ end }}
+
 		</div>
 	</body>
 </html>

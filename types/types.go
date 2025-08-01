@@ -38,12 +38,14 @@ type User struct {
 
 type PostStore interface {
 	GetPostById(int) (*Post, error)
-	GetPostsFromUser(string) ([]*Post, error)
+	GetPostsFromUser(int, int, string) ([]*Post, error)
 	CreatePost(Post) (*Post, error)
 	EditPost(*Post) error
 	DeletePost(int) error
 	GetLastTenPosts() ([]*Post, error)
-	GetPostsFromFriends(int) ([]*Post, error)
+	GetPostsFromFriends(int, int, int) ([]*Post, error)
+	GetPostsFromFriendsCount(int) (int, error)
+	GetPostsFromUserCount(int) (int, error)
 }
 
 type Post struct {
@@ -84,4 +86,17 @@ const (
 
 type Data map[string]any
 
+type PaginationData struct {
+	CurrentPage int
+	TotalPages  int
+	BaseURL     string
+	PageNumbers []int
+	PrevPage    int
+	NextPage    int
+	HasPrev     bool
+	HasNext     bool
+}
+
 const AvatarURL string = "https://t4.ftcdn.net/jpg/08/02/80/49/360_F_802804966_xBLll6ZNXekZkC9pXHkicTX04EYCNU2u.jpg"
+
+const MaxPerPage int = 10

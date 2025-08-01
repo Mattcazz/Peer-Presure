@@ -39,6 +39,9 @@
 			{{ else }}
 				<p class="text-light fst-italic">No posts yet.</p>
 			{{ end }}
+			{{ if .Pagination }}
+				{{ template "pagination" .Pagination }}
+			{{ end }}
 		</div>
 	</body>
 </html>

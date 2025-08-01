@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -84,6 +83,14 @@ func (h *Handler) handleHomeUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	username := vars["username"]
 
+	pageNumber := 1
+	pageStr := r.URL.Query().Get("page")
+	if pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			pageNumber = p
+		}
+	}
+
 	u, err := h.userStore.GetUserByUsername(username)
 
 	if err != nil {
@@ -104,7 +111,7 @@ func (h *Handler) handleHomeUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := h.postStore.GetPostsFromFriends(userId)
+	posts, pagination, err := paginateFeed(h, userId, pageNumber, username)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -112,8 +119,9 @@ func (h *Handler) handleHomeUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	d := types.Data{
-		"Posts":    posts,
-		"Username": username,
+		"Posts":      posts,
+		"Username":   username,
+		"Pagination": pagination,
 	}
 
 	web.RenderTemplate(w, "feed", d)
@@ -156,8 +164,7 @@ func (h *Handler) handleLoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("HX-Redirect", fmt.Sprintf("/home/%s", u.UserName))
-	w.WriteHeader(http.StatusNoContent)
+	h.handleHomeUser(w, r)
 }
 
 func (h *Handler) handleLoginGet(w http.ResponseWriter, r *http.Request) {
@@ -316,24 +323,4 @@ func (h *Handler) handleDeleteFriend(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("HX-Redirect", fmt.Sprintf("/%s/friends", username))
 	w.WriteHeader(http.StatusAccepted)
-}
-
-func loginUser(w http.ResponseWriter, userID int, username string) error {
-	secret := os.Getenv("JWT_SECRET")
-
-	token, err := auth.CreateJWT([]byte(secret), userID, username)
-
-	if err != nil {
-		return fmt.Errorf("Unauthorized")
-	}
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     "auth_token",
-		Value:    token,
-		Expires:  time.Now().Add(24 * time.Hour),
-		HttpOnly: true,
-		Secure:   false,
-	})
-
-	return nil
 }

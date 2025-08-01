@@ -68,13 +68,16 @@ func (s *Store) GetPostById(post_id int) (*types.Post, error) {
 }
 
 // GetPostsFromUser implements types.PostStore.
-func (s *Store) GetPostsFromUser(username string) ([]*types.Post, error) {
-	query := `SELECT * FROM posts WHERE username = $1 ORDER BY created_at DESC`
+func (s *Store) GetPostsFromUser(page, maxPerPage int, username string) ([]*types.Post, error) {
+
+	offset := (page - 1) * maxPerPage
+
+	query := `SELECT * FROM posts WHERE username = $1 ORDER BY created_at DESC OFFSET $2 LIMIT $3`
 
 	var posts []*types.Post
 	var post *types.Post
 
-	rows, err := s.db.Query(query, username)
+	rows, err := s.db.Query(query, username, offset, maxPerPage)
 
 	if err != nil {
 		return nil, err
@@ -125,16 +128,21 @@ func (s *Store) EditPost(post *types.Post) error {
 	return err
 }
 
-func (s *Store) GetPostsFromFriends(userId int) ([]*types.Post, error) {
+func (s *Store) GetPostsFromFriends(userId, page, maxPerPage int) ([]*types.Post, error) {
+
+	offset := (page - 1) * maxPerPage
+
 	query := `SELECT p.* FROM posts p 
 			  JOIN users u ON p.user_id = u.id
 			  JOIN friends f   ON (
       			(f.user_id1 = $1 AND p.user_id = f.user_id2) OR (f.user_id2 = $1 AND p.user_id = f.user_id1)
 			  )
-			  WHERE p.user_id != $1
-			  ORDER BY p.created_at DESC`
+			  WHERE p.user_id != $1 AND f.status = 'confirmed'
+			  ORDER BY p.created_at DESC
+			  OFFSET $2
+			  LIMIT $3`
 
-	rows, err := s.db.Query(query, userId)
+	rows, err := s.db.Query(query, userId, offset, maxPerPage)
 
 	if err != nil {
 		return nil, err
@@ -153,6 +161,32 @@ func (s *Store) GetPostsFromFriends(userId int) ([]*types.Post, error) {
 
 	return posts, nil
 
+}
+
+func (s *Store) GetPostsFromFriendsCount(userId int) (int, error) {
+	var totalCount int
+
+	query := `SELECT COUNT(*) FROM posts p 
+			  JOIN users u ON p.user_id = u.id
+			  JOIN friends f   ON (
+      			(f.user_id1 = $1 AND p.user_id = f.user_id2) OR (f.user_id2 = $1 AND p.user_id = f.user_id1)
+			  )
+			  WHERE p.user_id != $1 AND f.status = 'confirmed'`
+
+	err := s.db.QueryRow(query, userId).Scan(&totalCount)
+
+	return totalCount, err
+}
+
+func (s *Store) GetPostsFromUserCount(userId int) (int, error) {
+	var totalCount int
+
+	query := `SELECT COUNT(*) FROM posts p 
+			  WHERE user_id = $1`
+
+	err := s.db.QueryRow(query, userId).Scan(&totalCount)
+
+	return totalCount, err
 }
 
 func scanPostRow(r *sql.Rows) (*types.Post, error) {

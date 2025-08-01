@@ -125,19 +125,33 @@ func (h *Handler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := h.userStore.GetUserByUsername(username)
+	u, err := h.userStore.GetUserByUsername(username)
 
 	if err != nil {
 		http.Error(w, "User does not exist", http.StatusBadRequest)
 		return
 	}
 
-	posts, _ := h.postStore.GetPostsFromUser(username)
+	pageNumber := 1
+	pageStr := r.URL.Query().Get("page")
+	if pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			pageNumber = p
+		}
+	}
+
+	posts, pagination, err := paginatePosts(h, u.ID, pageNumber, username)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	data := types.Data{
 		"Posts":       posts,
 		"Username":    username,
 		"CurrentUser": currentUser,
+		"Pagination":  pagination,
 	}
 
 	web.RenderTemplate(w, "user-posts", data)

@@ -66,3 +66,21 @@ func GetIdFromURL(format string, r *http.Request) (int, error) {
 
 	return postID, nil
 }
+func PreparePagination(currentPage, totalPages int, baseUrl string) *types.PaginationData {
+
+	var pageNumbers []int
+	for i := 1; i <= totalPages; i++ {
+		pageNumbers = append(pageNumbers, i)
+	}
+
+	return &types.PaginationData{
+		CurrentPage: currentPage,
+		TotalPages:  totalPages,
+		BaseURL:     baseUrl,
+		PageNumbers: pageNumbers,
+		PrevPage:    currentPage - 1,
+		NextPage:    currentPage + 1,
+		HasPrev:     currentPage > 1,
+		HasNext:     currentPage < totalPages,
+	}
+}
