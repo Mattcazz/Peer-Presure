@@ -2,7 +2,6 @@ package user
 
 import (
 	"fmt"
-	"math"
 	"net/http"
 	"os"
 	"time"
@@ -40,24 +39,13 @@ func paginateFeed(h *Handler, userId, pageNumber int, username string) ([]*types
 		return nil, nil, err
 	}
 
-	totalPages := int(math.Ceil(float64(totalPostsCount) / float64(types.MaxPerPage)))
-
-	if totalPages == 0 {
-		totalPages = 1
-	}
-
 	posts, err := h.postStore.GetPostsFromFriends(userId, pageNumber, types.MaxPerPage)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var pagination *types.PaginationData
-
-	if totalPostsCount > types.MaxPerPage {
-		baseURL := fmt.Sprintf("/home/%s", username)
-		pagination = utils.PreparePagination(pageNumber, totalPages, baseURL)
-	}
+	pagination := utils.PreparePagination(pageNumber, totalPostsCount, fmt.Sprintf("/home/%s", username))
 
 	return posts, pagination, nil
 }

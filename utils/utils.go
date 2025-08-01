@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -66,8 +67,25 @@ func GetIdFromURL(format string, r *http.Request) (int, error) {
 
 	return postID, nil
 }
-func PreparePagination(currentPage, totalPages int, baseUrl string) *types.PaginationData {
 
+func PreparePagination(currentPage, totalPostsCount int, baseUrl string) *types.PaginationData {
+
+	totalPages := int(math.Ceil(float64(totalPostsCount) / float64(types.MaxPerPage)))
+
+	if totalPages == 0 {
+		totalPages = 1
+	}
+
+	var pagination *types.PaginationData
+
+	if totalPostsCount > types.MaxPerPage {
+		pagination = paginate(currentPage, totalPages, baseUrl)
+	}
+
+	return pagination
+}
+
+func paginate(currentPage, totalPages int, baseUrl string) *types.PaginationData {
 	var pageNumbers []int
 	for i := 1; i <= totalPages; i++ {
 		pageNumbers = append(pageNumbers, i)

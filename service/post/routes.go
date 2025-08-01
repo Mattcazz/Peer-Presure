@@ -140,12 +140,21 @@ func (h *Handler) handleGetUserPosts(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	posts, pagination, err := paginatePosts(h, u.ID, pageNumber, username)
+	totalPostsCount, err := h.postStore.GetPostsFromUserCount(u.ID)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	posts, err := h.postStore.GetPostsFromUser(pageNumber, types.MaxPerPage, username)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	pagination := utils.PreparePagination(pageNumber, totalPostsCount, fmt.Sprintf("/%s/posts", username))
 
 	data := types.Data{
 		"Posts":       posts,
