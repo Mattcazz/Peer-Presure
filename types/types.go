@@ -84,4 +84,4 @@ const (
 
 type Data map[string]any
 
-const AvatarURL string = "https://e7.pngegg.com/pngimages/84/165/png-clipart-united-states-avatar-organization-information-user-avatar-service-computer-wallpaper-thumbnail.png"
+const AvatarURL string = "https://t4.ftcdn.net/jpg/08/02/80/49/360_F_802804966_xBLll6ZNXekZkC9pXHkicTX04EYCNU2u.jpg"
