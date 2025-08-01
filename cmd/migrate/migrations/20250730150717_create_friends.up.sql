@@ -1,4 +1,4 @@
-CREATE TABLE friends (
+CREATE TABLE IF NOT EXISTS friends (
     user_id1 INTEGER NOT NULL,
     user_id2 INTEGER NOT NULL,
     status TEXT NOT NULL DEFAULT 'requested' CHECK (status IN ('requested', 'confirmed', 'rejected')),

@@ -35,18 +35,20 @@ func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 func (s *Store) CreateUser(user *types.User) error {
 
 	query := `INSERT INTO users 
-			(email, username, password, created_at)			
-			VALUES ($1, $2, $3, $4) RETURNING *`
+			(email, username, password, profile_pic_url ,created_at)			
+			VALUES ($1, $2, $3, $4, $5) RETURNING *`
 
 	err := s.db.QueryRow(query,
 		user.Email,
 		user.UserName,
 		user.Password,
+		user.ProfilePicUrl,
 		user.CreatedAt).Scan(
 		&user.ID,
 		&user.Email,
 		&user.UserName,
 		&user.Password,
+		&user.ProfilePicUrl,
 		&user.CreatedAt)
 
 	return err
@@ -147,6 +149,7 @@ func scanUserRow(row *sql.Rows) (*types.User, error) {
 		&user.Email,
 		&user.UserName,
 		&user.Password,
+		&user.ProfilePicUrl,
 		&user.CreatedAt)
 
 	return user, err

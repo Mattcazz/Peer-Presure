@@ -27,10 +27,11 @@ type LoginUserPayload struct {
 }
 
 type User struct {
-	ID       int    `json:"id"`
-	UserName string `json:"username"`
-	Email    string `json:"email"`
-	Password []byte `json:"-"`
+	ID            int    `json:"id"`
+	UserName      string `json:"username"`
+	Email         string `json:"email"`
+	Password      []byte `json:"-"`
+	ProfilePicUrl string `json:"profile_pic"`
 
 	CreatedAt time.Time `json:"created_at"`
 }
@@ -82,3 +83,5 @@ const (
 )
 
 type Data map[string]any
+
+const AvatarURL string = "https://e7.pngegg.com/pngimages/84/165/png-clipart-united-states-avatar-organization-information-user-avatar-service-computer-wallpaper-thumbnail.png"

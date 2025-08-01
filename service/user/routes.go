@@ -40,6 +40,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 }
 
 func (h *Handler) handleHome(w http.ResponseWriter, r *http.Request) {
+
 	cookie, err := r.Cookie("auth_token")
 	if err != nil {
 		h.handleHomeGuest(w, r)
@@ -56,6 +57,13 @@ func (h *Handler) handleHome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	username, err := auth.GetUsernameFromJWT(token)
+
+	if err != nil {
+		h.handleHomeGuest(w, r)
+		return
+	}
+
+	_, err = h.userStore.GetUserByUsername(username)
 
 	if err != nil {
 		h.handleHomeGuest(w, r)
@@ -79,7 +87,8 @@ func (h *Handler) handleHomeUser(w http.ResponseWriter, r *http.Request) {
 	u, err := h.userStore.GetUserByUsername(username)
 
 	if err != nil {
-		http.Error(w, "User does not exist", http.StatusBadRequest)
+		w.Header().Set("HX-Redirect", "/")
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 
@@ -198,10 +207,11 @@ func (h *Handler) handleRegisterPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := &types.User{
-		UserName:  payload.UserName,
-		Email:     payload.Email,
-		Password:  hashedPassword,
-		CreatedAt: time.Now(),
+		UserName:      payload.UserName,
+		Email:         payload.Email,
+		Password:      hashedPassword,
+		ProfilePicUrl: types.AvatarURL,
+		CreatedAt:     time.Now(),
 	}
 
 	err = h.userStore.CreateUser(user)
