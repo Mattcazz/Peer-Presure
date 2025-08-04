@@ -4,14 +4,17 @@
 
     <!-- Left: User info -->
     <div>
-      <h5 class="card-title">@{{ .UserName }}</h5>
-      <h6 class="card-subtitle mb-2 text-muted">{{ .Email }}</h6>
+      <a href="/{{ .UserName }}/posts" class="text-decoration-none text-reset">
+        <h5 class="card-title">@{{ .UserName }}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">{{ .Email }}</h6>
+      </a>
       <p class="card-text">
         <small>Friend since: {{ .CreatedAt.Format "Jan 2, 2006" }}</small>
       </p>
+
       <!-- Delete Friend Button -->
       <form 
-        hx-delete="/friends"
+        hx-post="/friends/delete"
         hx-target="closest .card"
         hx-swap="outerHTML"
         class="mt-2"

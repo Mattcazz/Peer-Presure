@@ -93,6 +93,7 @@ func (s *Store) GetUserFriends(userId int) ([]*types.User, error) {
 			  JOIN friends f ON 
   				(f.user_id1 = $1 AND u.id = f.user_id2) OR
   				(f.user_id2 = $1 AND u.id = f.user_id1)
+			  WHERE f.status = 'confirmed'		
 			  ORDER BY u.username ASC`
 
 	var users []*types.User
@@ -139,7 +140,6 @@ func (s *Store) RespondFriendRequest(id1, id2 int, r string) error {
 
 	return err
 }
-
 
 // Private function that returns a user given a row to scan
 func scanUserRow(row *sql.Rows) (*types.User, error) {
