@@ -6,22 +6,18 @@ import (
 	"os"
 
 	"github.com/Mattcazz/Peer-Presure.git/db"
-	"github.com/joho/godotenv"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func main() {
-
-	err := godotenv.Load()
-
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-
-	dbHost := os.Getenv("HOST")
-	dbUser := os.Getenv("PG_USER")
-	dbPassword := os.Getenv("PASSWORD")
-	dbName := os.Getenv("DATABASE")
-	dbPort := os.Getenv("PORT")
+	dbHost := os.Getenv("DB_HOST")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+	dbPort := os.Getenv("DB_PORT")
 
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", dbUser, dbPassword, dbHost, dbPort, dbName) //postgres://USER:PASSWORD@HOST:PORT/DATABASE?OPTIONS
 
@@ -30,6 +26,29 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// -------------------- Migrations -------------------- //
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://cmd/migrate/migrations",
+		"postgres", driver,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = m.Up();
+
+	if err != nil && err != migrate.ErrNoChange {
+		log.Fatal(err)
+	}
+	// ---------------------------------------------------- //
 
 	server := NewApiServer(":8080", db)
 
