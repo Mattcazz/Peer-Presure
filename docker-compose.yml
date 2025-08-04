@@ -24,7 +24,7 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=PeerPressure
     ports:
-      - "5432:5432"
+      - "6969:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
