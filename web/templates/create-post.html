@@ -20,7 +20,12 @@
 		</style>
 	</head>
 	<body class="bg-dark">
-		<div id="create-post-container" class="d-flex justify-content-center align-items-center min-vh-100">
+		<div id="create-post-container" class="d-flex justify-content-center align-items-center min-vh-100 flex-column">
+			<!-- Go Back Button -->
+			<div class="w-50 d-flex justify-content-end mb-2">
+				<a href="/" class="btn btn-outline-light">← Go Back</a>
+			</div>
+
 			<div id="create-post-form" class="bg-dark p-4 rounded w-50 border border-secondary text-light">
 				<form hx-post="/post" hx-target="#create-post-container" hx-swap="innerHTML">
 					<input
